@@ -1,0 +1,19 @@
+{
+  "plugins": [
+    ["transform-class-properties", { "loose": true }],
+    "transform-object-rest-spread",
+    "transform-async-generator-functions"
+  ],
+  "presets": [["es2015", { "loose": true, "modules": false }], "stage-0"],
+  "env": {
+    "cjs": {
+      "plugins": [["transform-es2015-modules-commonjs", { "loose": true }]]
+    },
+    "es": {
+      "plugins": ["./build/use-lodash-es"]
+    },
+    "rollup": {
+      "plugins": ["./build/use-lodash-es", "external-helpers"]
+    }
+  }
+}
