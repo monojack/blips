@@ -1,0 +1,35 @@
+{
+  "extends": [
+    "standard"
+  ],
+  "plugins": [
+    "standard",
+    "promise",
+  ],
+  "rules": {
+    "comma-dangle": [
+      "warn",
+      "always"
+    ],
+    "array-bracket-spacing": [
+      "warn",
+      "always"
+    ],
+    "object-curly-spacing": [
+      "warn",
+      "always"
+    ],
+    "no-sequences": [
+      "off"
+    ],
+    "no-console": [
+      "warn"
+    ],
+    "import/first": [
+      "off"
+    ],
+    "standard/object-curly-even-spacing": [
+      "off"
+    ]
+  }
+}
