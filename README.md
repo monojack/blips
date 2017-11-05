@@ -34,15 +34,18 @@ const createTodoMutation = `
 `
 
 // wth is store ?!!?!!111
-store.mutate(createTodoMutation, { variables: { label: 'Buy milk' } })
+store.mutate(createTodoMutation, { label: 'Buy milk' })
   .then(res => {
     // do something with res
   })
 ```
 
-### The code
+### The code (examples)
 
-> Disclaimer: The code folder structure in the following example does not represent a requirement or guideline. It's just how I use it.
+> Disclaimer: The folder structure in the following example does not represent a requirement or guideline. It's just how I use it.
+
+You can play with this code by cloning the repository and running the project in `examples/todos-vanillajs`.
+More coming soon.
 
 ```js
 // types.js
@@ -58,74 +61,75 @@ export default `
     allTodos: [Todo]!
   }
 
-  type Mutations {
-    createTodo: Todo!
-    updateTodo: Todo!
+  type Mutation {
+    createTodo(label: String!, completed: Boolean): Todo!
+    updateTodo(id: String!, label: String, completed: Boolean): Todo!
+    deleteTodo(id: String!): Todo!
   }
 
   type Subscription {
     allTodos: [Todo]!
   }
 `
-
 ```
 
 ```js
 // resolvers.js
+import uuid from 'uuid'
 
-export default (pubsub, withFilter) => ({
+export default ({ pubsub, withFilter, }) => ({
   Todo: {
-    // transform _id to id
-    id: ({ id, _id }, args, context) => _id || id,
+    id: ({ id, _id, }, args, context) => _id || id,
   },
-
   Query: {
-    allTodos: allTodos: (_, args, {store}) => store.get('todos')
+    allTodos: (_, args, { store, }) => store.get(null)('todos'),
   },
-
   Mutation: {
-    createTodo: (_, { label, completed = false }, { store }) => {
+    createTodo: (_, { label, completed = false, }, { store, }) => {
       const id = uuid()
-      const newTodo = {
+      const modified = store.post({
         _id: id,
         label,
-        completed
-      }
-
-      const newTodos = store.post(newTodo)('todos')
-      pubsub.publish('todoCreated')
-
-      return newTodo
-    },
-    updateTodo: (_, {id, label, completed}, {store}) => {
-      const newTodo = store.patch(id, {
-        label,
-        completed
+        completed,
       })('todos')
-      pubsub.publish('todoUpdated', { id })
-
-      return newTodo
-    }
-  }
-
+      pubsub.publish('TODO_CREATED')
+      return modified
+    },
+    updateTodo: (_, { id, label, completed, }, { store, }) => {
+      const modified = store.patch(id, {
+        label,
+        completed,
+      })('todos')
+      pubsub.publish('TODO_UPDATED', { id, })
+      return modified
+    },
+    deleteTodo: (_, { id, }, { store, }) => {
+      const modified = store.delete(id)('todos')
+      pubsub.publish('TODO_DELETED')
+      return modified
+    },
+  },
   Subscription: {
     allTodos: {
-      subscribe: () => pubsub.asyncIterator(['todoCreated', 'todoUpdated'])
+      resolve: (_, args, { store, }) => store.get(null)('todos'),
+      subscribe: () => pubsub.asyncIterator([ 'TODO_UPDATED', 'TODO_CREATED', 'TODO_DELETED', ]),
     },
-    todo: {
-      subscribe: withFilter(
-        () => pubsub.asyncIterator('todoUpdated'),
-        (args, variables) => {
-          return args.id === variables.id
-        }
-      )
-    },
-  }
+  },
 })
+
 ```
 
 ```js
 // operations.js
+export const allTodosQuery = `
+  query allTodosQuery {
+    allTodos {
+      id
+      label
+      completed
+    }
+  }
+`
 
 export const allTodosSubscription = `
   subscription allTodosSubscription {
@@ -138,7 +142,7 @@ export const allTodosSubscription = `
 `
 
 export const createTodoMutation = `
-  mutation createTodoMutation(label: String!, completed: Boolean) {
+  mutation createTodoMutation($label: String!, $completed: Boolean) {
     createTodo(label: $label, completed: $completed) {
       id
       label
@@ -148,7 +152,7 @@ export const createTodoMutation = `
 `
 
 export const updateTodoMutation = `
-  mutation updateTodoMutation(id: String!, label: String, completed: Boolean) {
+  mutation updateTodoMutation($id: String!, $label: String, $completed: Boolean) {
     updateTodo(id: $id, label: $label, completed: $completed) {
       id
       label
@@ -156,6 +160,17 @@ export const updateTodoMutation = `
     }
   }
 `
+
+export const deleteTodoMutation = `
+  mutation deleteTodoMutation($id: String!) {
+    deleteTodo(id: $id) {
+      id
+      label
+      completed
+    }
+  }
+`
+
 ```
 
 ```js
@@ -186,7 +201,7 @@ const store = createStore({typeDefs, resolvers}, initialState)
 
 
 const allTodosObservable = await store.subscribe(allTodosSubscription)
-const sub = allTodosObservable.subscribe(todos => console.log(todos))
+const sub = allTodosObservable.subscribe({data: {allTodos: todos}} => console.log(todos))
 
 // dispose mechanism works as expected
 sub.unsubscribe()
