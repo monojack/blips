@@ -9,10 +9,13 @@ export default (schemaDefs, initialStore, enhancers) => {
   const pubsub = new PubSub()
 
   const { typeDefs = ``, resolvers = {}, } =
-    typeof schemaDefs === 'function'
-      ? schemaDefs(
-        { pubsub, withFilter, } // pubsub
-      )
+    typeof schemaDefs.resolvers === 'function'
+      ? {
+        ...schemaDefs,
+        resolvers: schemaDefs.resolvers(
+          { pubsub, withFilter, } // pubsub
+        ),
+      }
       : schemaDefs || {}
 
   const _schema = makeExecutableSchema({ typeDefs, resolvers, })
@@ -20,38 +23,27 @@ export default (schemaDefs, initialStore, enhancers) => {
   const _get = id => resource => get(id)(_data[resource])
 
   const _post = payload => resource => {
-    const newEntry = post(payload)(_data[resource])
-    _data = {
-      ..._data,
-      [resource]: newEntry,
-    }
-    return newEntry
+    const [ modified, collection, ] = post(payload)(_data[resource])
+    _data[resource] = collection
+    return modified
   }
 
   const _put = (id, payload) => resource => {
-    const newEntry = put(id, payload)(_data[resource])
-    _data = {
-      ..._data,
-      [resource]: newEntry,
-    }
-    return newEntry
+    const [ modified, collection, ] = put(id, payload)(_data[resource])
+    _data[resource] = collection
+    return modified
   }
 
   const _patch = (id, payload) => resource => {
-    const newEntry = patch(id, payload)(_data[resource])
-    _data = {
-      ..._data,
-      [resource]: newEntry,
-    }
-    return newEntry
+    const [ modified, collection, ] = patch(id, payload)(_data[resource])
+    _data[resource] = collection
+    return modified
   }
 
   const _delete = id => resource => {
-    _data = {
-      ..._data,
-      [resource]: remove(id)(_data[resource]),
-    }
-    return _data[resource]
+    const [ modified, collection, ] = remove(id)(_data[resource])
+    _data[resource] = collection
+    return modified
   }
 
   const context = {
