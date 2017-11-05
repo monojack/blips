@@ -1,4 +1,4 @@
-# <a href='https://github.com/monojack/blips'><img src='https://raw.githubusercontent.com/monojack/blips/master/logo/blips-logo-dark-text.svg' height='100'></a>
+# <a href='https://github.com/monojack/blips'><img src='https://raw.githubusercontent.com/monojack/blips/master/logo/blips-logo-dark-text.png' height='100'></a>
 
 State container for your JavaScript apps
 
