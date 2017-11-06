@@ -1,11 +1,11 @@
-import { execute, subscribe, parse, visit, } from 'graphql'
+import { execute, subscribe, parse, } from 'graphql'
 import { makeExecutableSchema, } from 'graphql-tools'
 import { PubSub, withFilter, } from 'graphql-subscriptions'
 
 import { get, post, put, patch, remove, toObservable, } from './utils'
 
 export default (schemaDefs, initialStore, enhancers) => {
-  let _data = initialStore
+  let _state = initialStore
   const pubsub = new PubSub()
 
   const { typeDefs = ``, resolvers = {}, } =
@@ -20,35 +20,37 @@ export default (schemaDefs, initialStore, enhancers) => {
 
   const _schema = makeExecutableSchema({ typeDefs, resolvers, })
 
-  const _get = id => resource => get(id)(_data[resource])
+  const _get = id => collection => get(id)(_state[collection])
 
-  const _post = payload => resource => {
-    const [ modified, collection, ] = post(payload)(_data[resource])
-    _data[resource] = collection
+  const _post = payload => collection => {
+    const [ modified, nextCollection, ] = post(payload)(_state[collection])
+    _state[collection] = nextCollection
     return modified
   }
 
-  const _put = (id, payload) => resource => {
-    const [ modified, collection, ] = put(id, payload)(_data[resource])
-    _data[resource] = collection
+  const _put = (id, payload) => collection => {
+    const [ modified, nextCollection, ] = put(id, payload)(_state[collection])
+    _state[collection] = nextCollection
     return modified
   }
 
-  const _patch = (id, payload) => resource => {
-    const [ modified, collection, ] = patch(id, payload)(_data[resource])
-    _data[resource] = collection
+  const _patch = (id, payload) => collection => {
+    const [ modified, nextCollection, ] = patch(id, payload)(_state[collection])
+    _state[collection] = nextCollection
     return modified
   }
 
-  const _delete = id => resource => {
-    const [ modified, collection, ] = remove(id)(_data[resource])
-    _data[resource] = collection
+  const _delete = id => collection => {
+    const [ modified, nextCollection, ] = remove(id)(_state[collection])
+    _state[collection] = nextCollection
     return modified
   }
 
   const context = {
     store: {
-      data: _data,
+      get state () {
+        return _state
+      },
       get: _get,
       post: _post,
       put: _put,
@@ -74,8 +76,8 @@ export default (schemaDefs, initialStore, enhancers) => {
   }
 
   return {
-    get data () {
-      return _data
+    get state () {
+      return _state
     },
     get schema () {
       return _schema
@@ -83,7 +85,5 @@ export default (schemaDefs, initialStore, enhancers) => {
     query: _query,
     mutate: _mutate,
     subscribe: _subscribe,
-    parse,
-    visit,
   }
 }
