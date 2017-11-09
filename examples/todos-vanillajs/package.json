@@ -6,7 +6,14 @@
     "type": "git",
     "url": "git+https://github.com/monojack/webpack-babel-starter"
   },
-  "keywords": ["webpack", "babel", "es6", "es7", "es8", "starter"],
+  "keywords": [
+    "webpack",
+    "babel",
+    "es6",
+    "es7",
+    "es8",
+    "starter"
+  ],
   "main": "src/index.js",
   "scripts": {
     "start": "webpack-dev-server --open --config webpack.dev.js",
@@ -43,7 +50,7 @@
   },
   "dependencies": {
     "babel-polyfill": "^6.26.0",
-    "blips": "^0.3.0",
+    "blips": "^0.4.0",
     "graphql": "^0.11.7",
     "object-assign": "^4.1.1",
     "promise": "^8.0.1",
