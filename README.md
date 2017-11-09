@@ -9,7 +9,7 @@ State container for JavaScript applications
 The store can only be changed through **_mutations_**, you can read from it through **_queries_** and can also listen for changes with **_subscriptions_**.
 
 ## The why?
-I developed **Blips** because I wanted to use **GraphQL** with every project, regardless of what the API server looks like. So if my app is consuming a simple API (whatever kind), I can still have a *store* that manages the application state and write queries/mutations that would resolve with making requests to that API.
+I developed **Blips** because I wanted to use **GraphQL** with every project, regardless of what the API server looks like. So if my application is consuming a simple API (whatever kind), I can still have a *store* that manages the application state and write queries/mutations that would resolve with making requests to that API.
 
 ## The basics
 
@@ -103,7 +103,7 @@ const initialState = {
 const schemaDef = { typeDefs, resolvers }
 const store = createStore(schemaDef, initialState)
 ```
-You create a store by calling the `createStore` function provided by `blip` and passing it your schema definitions (`{ typeDefs, resolvers }`) and an optional initial state.
+You create a store by calling the `createStore` function provided by `blips` and passing it your schema definitions (`{ typeDefs, resolvers }`) and an optional initial state.
 The returned store instance has the following API:
   - `state`: getter for your entire state.
   - `schema`: getter for your generated schema.
