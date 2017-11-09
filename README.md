@@ -1,6 +1,6 @@
 # <a href='https://github.com/monojack/blips'><img src='https://raw.githubusercontent.com/monojack/blips/master/logo/blips-logo-dark-text.png' height='100'></a>
 
-State container for your JavaScript apps
+State container for JavaScript applications
 
 
 ## The concept
@@ -9,7 +9,7 @@ State container for your JavaScript apps
 The store can only be changed through **_mutations_**, you can read from it through **_queries_** and can also listen for changes with **_subscriptions_**.
 
 ## The why?
-I developed **Blips** because I wanted to use **GraphQL** with every project, regardless of what the API server looks like. So if my aplication is consuming a simple API (whatever kind), I can still have a *store* that manages the application state and write queries/mutations that would resolve with making requests to that API.
+I developed **Blips** because I wanted to use **GraphQL** with every project, regardless of what the API server looks like. So if my app is consuming a simple API (whatever kind), I can still have a *store* that manages the application state and write queries/mutations that would resolve with making requests to that API.
 
 ## The basics
 
@@ -61,10 +61,10 @@ The `!` marks the field as required. See [graphql.org](http://graphql.org/learn/
 
 export default {
   Query: {
-    allTodos: (obj, args, { store }) => store.data.todos || []
+    allTodos: (obj, args, { store }) => store.state.todos || []
   },
   Mutation: {
-    createTodo: (obj, { id, label, completed = false }, { store: { data: { todos } } }) => {
+    createTodo: (obj, { id, label, completed = false }, { store: { state: { todos } } }) => {
       const newTodo = { id, label, completed }
       todos = [ ...todos, newTodo ]
       return newTodo
@@ -105,9 +105,9 @@ const store = createStore(schemaDef, initialState)
 ```
 You create a store by calling the `createStore` function provided by `blip` and passing it your schema definitions (`{ typeDefs, resolvers }`) and an optional initial state.
 The returned store instance has the following API:
-  - `data`: getter for your entire state.
+  - `state`: getter for your entire state.
   - `schema`: getter for your generated schema.
-  - `store`: object containing a couple of opinionated helper methods for working with your data. See [helper methods](#helper-methods)
+  - `store`: provides access to the state object and a couple of CRUD methods for managing it, provided through [state-clerk](https://github.com/monojack/state-clerk).
   - `query`: method for executing queries.
   - `mutate`: method for executing mutations.
   - `subscribe`: method for registering subscriptions.
@@ -195,7 +195,7 @@ Plus, using `async/await` will still make your code look synchronous and badass.
 1. [GraphQL subscriptions RFC](https://github.com/facebook/graphql/blob/master/rfcs/Subscriptions.md)
 2. [Proposal for GraphQL Subscriptions by Apollo](https://dev-blog.apollodata.com/a-proposal-for-graphql-subscriptions-1d89b1934c18)
 
-In addition to polling queries or scheduling them to execute at different moments throughout your application life-cycle to keep you data up-to-date, you can also subscribe to changes through GraphQL subscriptions:
+In addition to polling queries or scheduling them to execute at different moments throughout your application life-cycle to keep your data up-to-date, you can also subscribe to changes through GraphQL subscriptions:
 
 ```js
 const allTodosSubscription = `
@@ -235,12 +235,12 @@ export default ({ pubsub, withFilter }) => ({
   Query: { ... },
   Subscription: {
     allTodos: {
-      resolve: (obj, args, { store }) => store.data.todos || [],
+      resolve: (obj, args, { store }) => store.state.todos || [],
       subscribe: () => pubsub.asyncIterator([ 'TODO_UPDATED', 'TODO_CREATED', 'TODO_DELETED', ]),
     }
   }
   Mutation: {
-    createTodo: (obj, { id, label, completed = false }, { store: { data: { todos } } }) => {
+    createTodo: (obj, { id, label, completed = false }, { store: { state: { todos } } }) => {
       const newTodo = { id, label, completed }
       todos = [ ...todos, newTodo ]
 
@@ -354,7 +354,6 @@ const allTodosQuery = `
 
 const todos = await store.fetch(allTodosQuery, { first: 10 })
 ```
-
 
 ## The kudos
 
