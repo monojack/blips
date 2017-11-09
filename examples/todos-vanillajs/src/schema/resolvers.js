@@ -23,11 +23,15 @@ export default ({ pubsub, withFilter, }) => ({
   Mutation: {
     createTodo: (_, { label, completed = false, }, { store, }) => {
       const id = uuid()
-      const modified = store.post('todos', {
-        _id: id,
-        label,
-        completed,
-      })
+      const modified = store.post(
+        'todos',
+        {
+          _id: id,
+          label,
+          completed,
+        },
+        id
+      )
       pubsub.publish('TODO_CREATED')
       return modified
     },
