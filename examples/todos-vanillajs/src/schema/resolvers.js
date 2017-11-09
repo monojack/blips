@@ -16,36 +16,42 @@ export default ({ pubsub, withFilter, }) => ({
     id: ({ id, _id, }, args, context) => _id || id,
   },
   Query: {
-    allTodos: (_, args, { store, }) => store.get(null)('todos'),
+    allTodos: (_, args, { store, }) => {
+      return Object.values(store.get('todos'))
+    },
   },
   Mutation: {
     createTodo: (_, { label, completed = false, }, { store, }) => {
       const id = uuid()
-      const modified = store.post({
+      const modified = store.post('todos', {
         _id: id,
         label,
         completed,
-      })('todos')
+      })
       pubsub.publish('TODO_CREATED')
       return modified
     },
     updateTodo: (_, { id, label, completed, }, { store, }) => {
-      const modified = store.patch(id, {
-        label,
-        completed,
-      })('todos')
+      const modified = store.patch(
+        'todos',
+        {
+          label,
+          completed,
+        },
+        id
+      )
       pubsub.publish('TODO_UPDATED', { id, })
       return modified
     },
     deleteTodo: (_, { id, }, { store, }) => {
-      const modified = store.delete(id)('todos')
+      const modified = store.delete('todos', id)
       pubsub.publish('TODO_DELETED')
       return modified
     },
   },
   Subscription: {
     allTodos: {
-      resolve: (_, args, { store, }) => store.get(null)('todos'),
+      resolve: (_, args, { store, }) => Object.values(store.get('todos')),
       subscribe: () => pubsub.asyncIterator([ 'TODO_UPDATED', 'TODO_CREATED', 'TODO_DELETED', ]),
     },
   },
