@@ -1,6 +1,6 @@
 import { Observable, } from 'rxjs/Observable'
 
-export const toObservable = iterator => {
+export function toObservable (iterator) {
   return Observable.create(observer => {
     ;(async () => {
       try {

@@ -5,7 +5,7 @@ import Clerk from 'state-clerk'
 
 import { toObservable, } from './utils'
 
-export default (schemaDefs, initialState, enhancers) => {
+export function createStore (schemaDefs, initialState, enhancers) {
   let _state = initialState
 
   const clerk = new Clerk(_state)
