@@ -2,6 +2,7 @@
 
 State container for JavaScript applications
 
+[![Build Status](https://travis-ci.org/monojack/blips.svg?branch=master)](https://travis-ci.org/monojack/blips)
 
 ## The concept
 **Blips** exposes a simple, GraphQL-like API for managing your application state, which is contained inside a single *store*.
