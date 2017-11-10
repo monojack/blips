@@ -1,7 +1,7 @@
 const path = require('path')
-const webpack = require('webpack')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const CleanWebpackPlugin = require('clean-webpack-plugin')
+const CopyWebpackPlugin = require('copy-webpack-plugin')
 
 module.exports = {
   entry: [
@@ -58,7 +58,11 @@ module.exports = {
       },
     ],
   },
-  plugins: [ new CleanWebpackPlugin([ 'dist', ]), new HtmlWebpackPlugin({ template: './src/index.html', }), ],
+  plugins: [
+    new CleanWebpackPlugin([ 'dist', ]),
+    new HtmlWebpackPlugin({ template: './src/index.html', }),
+    new CopyWebpackPlugin([ { from: 'src/favicon.ico', }, ]),
+  ],
   node: {
     dgram: 'empty',
     fs: 'empty',
