@@ -42,26 +42,19 @@ export function createStore (schemaDefs, initialState, enhancers) {
     },
   }
 
-  const _query = (literal, variableValues, operationName) => {
+  const _query = (literal, { variables, } = {}, operationName) => {
     const documentAST = typeof literal === 'string' ? parse(literal) : literal
-    return execute(_schema, documentAST, {}, context, variableValues, operationName)
+    return execute(_schema, documentAST, {}, context, variables, operationName)
   }
 
-  const _mutate = (literal, variableValues, operationName) => {
+  const _mutate = (literal, { variables, } = {}, operationName) => {
     const documentAST = typeof literal === 'string' ? parse(literal) : literal
-    return execute(_schema, documentAST, {}, context, variableValues, operationName)
+    return execute(_schema, documentAST, {}, context, variables, operationName)
   }
 
-  const _subscribe = async (literal, variableValues, operationName) => {
+  const _subscribe = async (literal, { variables, } = {}, operationName) => {
     const documentAST = typeof literal === 'string' ? parse(literal) : literal
-    const iterator = await subscribe(
-      _schema,
-      documentAST,
-      {},
-      context,
-      variableValues,
-      operationName
-    )
+    const iterator = await subscribe(_schema, documentAST, {}, context, variables, operationName)
     return toObservable(iterator)
   }
 
