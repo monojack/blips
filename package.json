@@ -1,6 +1,6 @@
 {
   "name": "blips",
-  "version": "0.4.2",
+  "version": "0.5.0",
   "description": "State management for the GraphQL heads",
   "repository": {
     "type": "git",
