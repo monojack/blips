@@ -59,7 +59,7 @@ document.querySelector('.new-todo').addEventListener('keyup', async e => {
   if (e.keyCode !== 13) return
 
   // reset the input value after the mutation
-  await store.mutate(createTodoMutation, { label: e.target.value, })
+  await store.mutate(createTodoMutation, { variables: { label: e.target.value, }, })
   e.target.value = ''
 })
 
@@ -73,7 +73,7 @@ const handleToggle = async e => {
 
   // use store.mutate with `updateTodoMutation` to update the completion state of the todo.
   // `updateTodoMutation` should patch the todo, so we don't need to send the entire payload
-  id && store.mutate(updateTodoMutation, { id, completed: checked, })
+  id && store.mutate(updateTodoMutation, { variables: { id, completed: checked, }, })
 }
 
 // remove handler
@@ -81,7 +81,7 @@ const handleRemove = e => {
   const { target: { dataset: { id, }, }, } = e
 
   // use store.mutate with `deleteTodoMutation` to remove a todo
-  id && store.mutate(deleteTodoMutation, { id, })
+  id && store.mutate(deleteTodoMutation, { variables: { id, }, })
 }
 
 // use this to trigger different handlers based on the target element tagName:
