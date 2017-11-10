@@ -1,4 +1,4 @@
-import { Observable, } from 'rxjs'
+import { Observable, } from 'rxjs/Observable'
 
 export const toObservable = iterator => {
   return Observable.create(observer => {

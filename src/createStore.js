@@ -1,5 +1,5 @@
 import { execute, subscribe, parse, } from 'graphql'
-import { makeExecutableSchema, } from 'graphql-tools'
+import { makeExecutableSchema, } from 'graphql-tools/dist/schemaGenerator'
 import { PubSub, withFilter, } from 'graphql-subscriptions'
 import Clerk from 'state-clerk'
 
