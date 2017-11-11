@@ -16,9 +16,7 @@ export default ({ pubsub, withFilter }) => ({
     id: ({ id, _id }, args, context) => _id || id,
   },
   Query: {
-    allTodos: (_, args, { store }) => {
-      return Object.values(store.get('todos'))
-    },
+    allTodos: (_, args, { store }) => Object.values(store.get('todos')),
   },
   Mutation: {
     createTodo: (_, { label, completed = false }, { store }) => {

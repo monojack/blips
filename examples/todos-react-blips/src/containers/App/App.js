@@ -4,7 +4,6 @@ import { graphql } from 'react-blips'
 import { TodoList } from '../../components'
 
 import {
-  allTodosQuery,
   allTodosSubscription,
   createTodoMutation,
   updateTodoMutation,
@@ -79,9 +78,9 @@ class App extends Component {
 }
 
 export default graphql(
-  allTodosQuery,
   allTodosSubscription,
   createTodoMutation,
   updateTodoMutation,
-  deleteTodoMutation
+  deleteTodoMutation,
+  { options: { variables: { id: 'asdfbh9f-werg34' } } }
 )(App)
