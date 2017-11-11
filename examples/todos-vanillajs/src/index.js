@@ -30,7 +30,9 @@ const initialState = {
 }
 
 // create the store
-const store = createStore({ typeDefs, resolvers, }, initialState)
+const store = createStore({ typeDefs, resolvers, }, initialState, {
+  context: { user: { firstName: 'Anouk', }, },
+})
 
 // renders the list of todos and the todo count
 const render = todos => {
@@ -59,7 +61,10 @@ document.querySelector('.new-todo').addEventListener('keyup', async e => {
   if (e.keyCode !== 13) return
 
   // reset the input value after the mutation
-  await store.mutate(createTodoMutation, { variables: { label: e.target.value, }, })
+  await store.mutate(createTodoMutation, {
+    variables: { label: e.target.value, },
+    context: { foo: 'meeeeeeeeh', },
+  })
   e.target.value = ''
 })
 

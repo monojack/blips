@@ -16,12 +16,12 @@ export default ({ pubsub, withFilter, }) => ({
     id: ({ id, _id, }, args, context) => _id || id,
   },
   Query: {
-    allTodos: (_, args, { store, }) => {
+    allTodos: (_, args, { store, user, }) => {
       return Object.values(store.get('todos'))
     },
   },
   Mutation: {
-    createTodo: (_, { label, completed = false, }, { store, }) => {
+    createTodo: (_, { label, completed = false, }, { store, foo, }) => {
       const id = uuid()
       const modified = store.post(
         'todos',
