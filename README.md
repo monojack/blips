@@ -102,9 +102,14 @@ const initialState = {
   }
 }
 const schemaDef = { typeDefs, resolvers }
+
+// createStore({ typeDefs [, resolvers] } [, initialState] [, options] )
 const store = createStore(schemaDef, initialState)
 ```
-You create a store by calling the `createStore` function provided by `blips` and passing it your schema definitions (`{ typeDefs, resolvers }`) and an optional initial state.
+You create a store by calling the `createStore` function provided by `blips` and passing it your schema definitions (`{ typeDefs, resolvers }`) and an optional initial state. In addition to the `schemaDefs` and `initialState`, the `createStore` method also accepts `options` as the last and optional argument. `options` is used for tapping into the initial setup.
+
+For now, you can use `options` to extend the context provided to resolvers ( _`const store = createStore(schemaDefs, initialState, { context: { user: { ...loggedUser } } })`_), but any PR is welcome if you come up with good ideas.
+
 The returned store instance has the following API:
   - `state`: getter for your entire state.
   - `schema`: getter for your generated schema.
@@ -149,7 +154,7 @@ Read more about [queries and mutations](http://graphql.org/learn/queries)
 
 import { todoQuery, createTodoMutation } from 'blips'
 
-store.query(todoQuery, { id: '3c4a086e-2151-4b54-acb2-13044ea553c1' }).then(res => {
+store.query(todoQuery, { variables: { id: '3c4a086e-2151-4b54-acb2-13044ea553c1' } }).then(res => {
   console.log(res)
   // {
   //   data: {
@@ -161,7 +166,7 @@ store.query(todoQuery, { id: '3c4a086e-2151-4b54-acb2-13044ea553c1' }).then(res 
   // }
 })
 
-store.mutate(createTodoMutation, { id: '4ecca858-67f8-491e-94cc-48b262061819', label: 'Learn Blips' }).then(res => {
+store.mutate(createTodoMutation, { variables: { id: '4ecca858-67f8-491e-94cc-48b262061819', label: 'Learn Blips' } }).then(res => {
   console.log(res)
   // {
   //   data: {
@@ -300,6 +305,72 @@ The `updateTodoMutation` will publish the updated todo over the `TODO_UPDATED` t
 
 Head over to [graphql-subscriptions](https://github.com/apollographql/graphql-subscriptions) for a more detailed documentation on how to use this PubSub implementation.
 
+
+
+#### extending context
+You can extend the context provided to the resolvers in two ways:
+
+**1.** When creating the store, by passing a `context` object through the `options` argument. This will extend the default context will be available to all your resolvers:
+```js
+const store = createStore({ typeDefs, resolvers }, initialState, { context: { foo: 'bar' } })
+```
+
+**2.** Through the `options` argument of every executor, which will make it available only for that execution context:
+> `store.query(allBookmarksQuery, { context: { user: loggedUser } })`
+
+example:
+```js
+// types
+const typeDefs = `
+  type Bookmarks {
+    id: Int!,
+    post: Post!,
+    user: User!
+  }
+
+  type Query {
+    allBookmarks: [Bookmark]!
+  }
+`
+
+// resolvers
+const resolvers = {
+  Query: {
+    allBookmarks: (object, args, { store, user }) => {
+      // using identifier { user_id: user.id } to return only the current user's bookmarks
+      return store.get('bookmarks', { user_id: user.id })
+      // Returns:
+      // [
+      //   { id: 1, post_id: 11, user_id: 23 },
+      //   { id: 3, post_id: 155, user_id: 23 }
+      // ]
+    }
+  }
+}
+
+// initial state
+const initialState = {
+  bookmarks: [
+    { id: 1, post_id: 11, user_id: 23 },
+    { id: 2, post_id: 356, user_id: 77 },
+    { id: 3, post_id: 155, user_id: 23 }
+  ]
+}
+
+const store = createStore({ typeDefs, resolvers }, initialState)
+
+const allBookmarksQuery = `
+  query allBookmarksQuery {
+    allBookmarks {
+      id
+      post
+      user
+    }
+  }
+`
+const myBookmarks = store.query(allBookmarksQuery, { context: { user: loggedUser } })
+```
+
 ### Fetching data
 
 Your access is not limited to the default context, nor limited to working with only the local state. Resolvers can completely ignore any context and just make async requests to external API servers.
@@ -327,21 +398,20 @@ const createTodoMutation = `
   }
 `
 
-const newTodo = await store.mutate(createTodoMutation, { label: 'Buy milk' })
+const newTodo = await store.mutate(createTodoMutation, { variables: { label: 'Buy milk' } })
 
 ```
 
 #### GraphQL API   _*coming soon*_
 
 ```js
-import { createStore , createNetworkInterface } from 'blips'
+import { createStore } from 'blips'
 import resolvers from './resolvers'
 import typeDefs from './types'
 
 const initialState = {}
-const networkInterface: createNetworkInterface({ uri: 'http://localhost:8080/graphql' })
 
-const store = createStore({ typeDefs, resolvers }, initialState, networkInterface)
+const store = createStore({ typeDefs, resolvers }, initialState, { endpoint: 'http://localhost:3000/graphql' })
 
 const allTodosQuery = `
   query allTodosQuery($first: Int) {
