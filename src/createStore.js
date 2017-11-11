@@ -3,9 +3,9 @@ import { makeExecutableSchema, } from 'graphql-tools/dist/schemaGenerator'
 import { PubSub, withFilter, } from 'graphql-subscriptions'
 import Clerk from 'state-clerk'
 
-import { toObservable, } from './utils'
+import { toObservable, extendContext, } from './utils'
 
-export function createStore (schemaDefs, initialState, enhancers) {
+export function createStore (schemaDefs, initialState, options) {
   let _state = initialState
 
   const clerk = new Clerk(_state)
@@ -23,7 +23,7 @@ export function createStore (schemaDefs, initialState, enhancers) {
 
   const _schema = makeExecutableSchema({ typeDefs, resolvers, })
 
-  const context = {
+  const defaultContext = {
     store: {
       get state () {
         return _state
@@ -42,19 +42,28 @@ export function createStore (schemaDefs, initialState, enhancers) {
     },
   }
 
-  const _query = (literal, { variables, } = {}, operationName) => {
+  const context = extendContext(defaultContext, options.context)
+
+  const _query = (literal, { variables, context: ctx, } = {}, operationName) => {
     const documentAST = typeof literal === 'string' ? parse(literal) : literal
-    return execute(_schema, documentAST, {}, context, variables, operationName)
+    return execute(_schema, documentAST, {}, extendContext(context, ctx), variables, operationName)
   }
 
-  const _mutate = (literal, { variables, } = {}, operationName) => {
+  const _mutate = (literal, { variables, context: ctx, } = {}, operationName) => {
     const documentAST = typeof literal === 'string' ? parse(literal) : literal
-    return execute(_schema, documentAST, {}, context, variables, operationName)
+    return execute(_schema, documentAST, {}, extendContext(context, ctx), variables, operationName)
   }
 
-  const _subscribe = async (literal, { variables, } = {}, operationName) => {
+  const _subscribe = async (literal, { variables, context: ctx, } = {}, operationName) => {
     const documentAST = typeof literal === 'string' ? parse(literal) : literal
-    const iterator = await subscribe(_schema, documentAST, {}, context, variables, operationName)
+    const iterator = await subscribe(
+      _schema,
+      documentAST,
+      {},
+      extendContext(context, ctx),
+      variables,
+      operationName
+    )
     return toObservable(iterator)
   }
 

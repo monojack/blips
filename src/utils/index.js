@@ -1,1 +1,2 @@
-export * from './toObservable'
+export { toObservable, } from './toObservable'
+export { extendContext, } from './extendContext'
