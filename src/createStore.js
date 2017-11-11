@@ -5,7 +5,7 @@ import Clerk from 'state-clerk'
 
 import { toObservable, extendContext, } from './utils'
 
-export function createStore (schemaDefs, initialState, options) {
+export function createStore (schemaDefs, initialState, options = {}) {
   let _state = initialState
 
   const clerk = new Clerk(_state)
