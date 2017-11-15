@@ -567,8 +567,8 @@ const resolvers = {
 }
 
 const userCommentsQuery = `
-  userCommentsQuery($uid: String!) {
-    query userComments(uid: $uid) {
+  query userCommentsQuery($uid: String!) {
+    userComments(uid: $uid) {
       idea
       message
       created
