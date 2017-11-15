@@ -11,14 +11,14 @@ State container for JavaScript applications
 ## Table of contents
 
 * [The concept](#the-concept)
-* [The why?](#the-why?)
+* [The why?](#the-why)
 * [The basics](#the-basics)
   * [installation](#installation)
   * [creating the store](#creating-the-store)
   * [operations and execution](#operations-and-execution)
   * [subscriptions](#subscriptions)
   * [fetching data](#fetching-data)
-  * [extending the content](#extending-the-context)
+  * [extending the context](#extending-the-context)
   * [use with React](#use-with-react)
 * [The tips](#the-tips)
 * [The kudos](#the-kudos)
