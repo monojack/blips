@@ -115,7 +115,8 @@ export function createStore (schemaDefs, initialState, options = {}) {
       variables,
       operationName
     )
-    return toObservable(iterator)
+    iterator.toObservable = () => toObservable(iterator)
+    return iterator.toObservable()
   }
 
   return {
