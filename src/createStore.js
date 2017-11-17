@@ -46,15 +46,66 @@ export function createStore (schemaDefs, initialState, options = {}) {
 
   const _query = (literal, { variables, context: ctx, } = {}, operationName) => {
     const documentAST = typeof literal === 'string' ? parse(literal) : literal
-    return execute(_schema, documentAST, {}, extendContext(context, ctx), variables, operationName)
+    if (!documentAST.definitions || documentAST.definitions.length === 1) {
+      return execute(
+        _schema,
+        documentAST,
+        {},
+        extendContext(context, ctx),
+        variables,
+        operationName
+      )
+    }
+
+    const promises = documentAST.definitions.map(operation => {
+      return execute(
+        _schema,
+        documentAST,
+        {},
+        extendContext(context, ctx),
+        variables,
+        operation.name.value
+      )
+    })
+
+    return new Promise((resolve, reject) => {
+      Promise.all(promises).then(
+        res => {
+          const merged = res.reduce((acc, curr) => {
+            return {
+              ...acc,
+              data: { ...(acc['data'] || {}), ...(curr['data'] || {}), },
+              errors: [ ...(acc['errors'] || []), ...(curr['errors'] || []), ],
+            }
+          }, {})
+          resolve(merged)
+        },
+        err => reject(err)
+      )
+    })
   }
 
-  const _mutate = (literal, { variables, context: ctx, } = {}, operationName) => {
+  const _mutate = (
+    literal,
+    { variables, context: ctx, } = {},
+    operationName
+  ) => {
     const documentAST = typeof literal === 'string' ? parse(literal) : literal
-    return execute(_schema, documentAST, {}, extendContext(context, ctx), variables, operationName)
+    return execute(
+      _schema,
+      documentAST,
+      {},
+      extendContext(context, ctx),
+      variables,
+      operationName
+    )
   }
 
-  const _subscribe = async (literal, { variables, context: ctx, } = {}, operationName) => {
+  const _subscribe = async (
+    literal,
+    { variables, context: ctx, } = {},
+    operationName
+  ) => {
     const documentAST = typeof literal === 'string' ? parse(literal) : literal
     const iterator = await subscribe(
       _schema,
