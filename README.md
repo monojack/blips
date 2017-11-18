@@ -7,6 +7,8 @@
 State container for JavaScript applications
 
 [![Build Status](https://travis-ci.org/monojack/blips.svg?branch=master)](https://travis-ci.org/monojack/blips)
+[![npm version](https://img.shields.io/npm/v/blips.svg)](https://www.npmjs.com/package/blips)
+[![npm downloads](https://img.shields.io/npm/dm/blips.svg)](https://www.npmjs.com/package/blips)
 
 ## Table of contents
 
