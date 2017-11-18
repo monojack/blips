@@ -75,7 +75,7 @@ export function createStore (schemaDefs = {}, initialState, options = {}) {
     const iterator = await _executor(subscribe)(source, options, operationName)
 
     iterator.toObservable = () => toObservable(iterator)
-    return iterator.toObservable()
+    return iterator
   }
 
   return {
