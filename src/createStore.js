@@ -1,120 +1,79 @@
-import { execute, subscribe, parse, } from 'graphql'
+import { execute, subscribe, } from 'graphql'
 import { makeExecutableSchema, } from 'graphql-tools/dist/schemaGenerator'
 import { PubSub, withFilter, } from 'graphql-subscriptions'
 import Clerk from 'state-clerk'
 
-import { toObservable, extendContext, } from './utils'
+import {
+  toObservable,
+  extendContext,
+  getDocument,
+  promiseBatch,
+  when,
+} from './utils'
 
-export function createStore (schemaDefs, initialState, options = {}) {
+export function createStore (schemaDefs = {}, initialState, options = {}) {
   let _state = initialState
 
-  const clerk = new Clerk(_state)
-  const pubsub = new PubSub()
+  const _clerk = new Clerk(_state)
+  const _pubsub = new PubSub()
 
-  const { typeDefs = ``, resolvers = {}, } =
-    typeof schemaDefs.resolvers === 'function'
-      ? {
-        ...schemaDefs,
-        resolvers: schemaDefs.resolvers(
-          { pubsub, withFilter, } // pubsub
-        ),
-      }
-      : schemaDefs || {}
+  const _computeSchemaDefs = ({ resolvers, ...defs }) => ({
+    ...defs,
+    resolvers: resolvers(
+      { pubsub: _pubsub, withFilter, } // pubsub
+    ),
+  })
 
-  const _schema = makeExecutableSchema({ typeDefs, resolvers, })
+  const _schema = makeExecutableSchema(
+    when(typeof schemaDefs.resolvers === 'function', _computeSchemaDefs)(
+      schemaDefs
+    )
+  )
 
-  const defaultContext = {
-    store: {
-      get state () {
-        return _state
-      },
-      set state (data) {
-        _state = data
-      },
-      get: clerk.get,
-      post: clerk.post,
-      put: clerk.put,
-      patch: clerk.patch,
-      delete: clerk.delete,
-      getCollection: clerk.getCollection,
-      addCollection: clerk.addCollection,
-      removeCollection: clerk.removeCollection,
-    },
-  }
-
-  const context = extendContext(defaultContext, options.context)
-
-  const _query = (literal, { variables, context: ctx, } = {}, operationName) => {
-    const documentAST = typeof literal === 'string' ? parse(literal) : literal
-    if (!documentAST.definitions || documentAST.definitions.length === 1) {
-      return execute(
-        _schema,
-        documentAST,
-        {},
-        extendContext(context, ctx),
-        variables,
-        operationName
-      )
-    }
-
-    const promises = documentAST.definitions.map(operation => {
-      return execute(
-        _schema,
-        documentAST,
-        {},
-        extendContext(context, ctx),
-        variables,
-        operation.name.value
-      )
-    })
-
-    return new Promise((resolve, reject) => {
-      Promise.all(promises).then(
-        res => {
-          const merged = res.reduce((acc, curr) => {
-            return {
-              ...acc,
-              data: { ...(acc['data'] || {}), ...(curr['data'] || {}), },
-              errors: [ ...(acc['errors'] || []), ...(curr['errors'] || []), ],
-            }
-          }, {})
-          resolve(merged)
+  const _context = extendContext(
+    {
+      store: {
+        get state () {
+          return _state
         },
-        err => reject(err)
+        set state (data) {
+          _state = data
+        },
+        ..._clerk,
+      },
+    },
+    options.context
+  )
+
+  const _executor = fn => (
+    sourceOrDocument,
+    { variables, context, } = {},
+    operationName
+  ) =>
+    fn(
+      _schema,
+      getDocument(sourceOrDocument),
+      {},
+      extendContext(_context, context),
+      variables,
+      operationName
+    )
+
+  const _query = (source, options, operationName) => {
+    const document = getDocument(source)
+
+    return promiseBatch(
+      document.definitions.map(definition =>
+        _executor(execute)(document, options, definition.name.value)
       )
-    })
-  }
-
-  const _mutate = (
-    literal,
-    { variables, context: ctx, } = {},
-    operationName
-  ) => {
-    const documentAST = typeof literal === 'string' ? parse(literal) : literal
-    return execute(
-      _schema,
-      documentAST,
-      {},
-      extendContext(context, ctx),
-      variables,
-      operationName
     )
   }
 
-  const _subscribe = async (
-    literal,
-    { variables, context: ctx, } = {},
-    operationName
-  ) => {
-    const documentAST = typeof literal === 'string' ? parse(literal) : literal
-    const iterator = await subscribe(
-      _schema,
-      documentAST,
-      {},
-      extendContext(context, ctx),
-      variables,
-      operationName
-    )
+  const _mutate = _executor(execute)
+
+  const _subscribe = async (source, options, operationName) => {
+    const iterator = await _executor(subscribe)(source, options, operationName)
+
     iterator.toObservable = () => toObservable(iterator)
     return iterator.toObservable()
   }
@@ -126,8 +85,8 @@ export function createStore (schemaDefs, initialState, options = {}) {
     get schema () {
       return _schema
     },
-    query: _query,
     mutate: _mutate,
+    query: _query,
     subscribe: _subscribe,
   }
 }
