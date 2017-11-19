@@ -1,4 +1,5 @@
-import { execute, subscribe, } from 'graphql'
+import invariant from 'invariant'
+import { subscribe, graphql, } from 'graphql'
 import { makeExecutableSchema, } from 'graphql-tools/dist/schemaGenerator'
 import { PubSub, withFilter, } from 'graphql-subscriptions'
 import Clerk from 'state-clerk'
@@ -45,35 +46,50 @@ export function createStore (schemaDefs = {}, initialState, options = {}) {
     options.context
   )
 
-  const _executor = fn => (
+  const _executor = (fn, isSubscription = false) => (
     sourceOrDocument,
     { variables, context, } = {},
     operationName
   ) =>
     fn(
       _schema,
-      getDocument(sourceOrDocument),
+      when(isSubscription, getDocument)(sourceOrDocument),
       {},
       extendContext(_context, context),
       variables,
       operationName
     )
 
-  const _query = (source, options, operationName) => {
-    const document = getDocument(source)
+  const _execute = operation => (source, options) => {
+    const operations = getDocument(source).definitions.filter(
+      definition => definition.operation === operation
+    )
 
     return promiseBatch(
-      document.definitions.map(definition =>
-        _executor(execute)(document, options, definition.name.value)
+      operations.map(definition =>
+        _executor(graphql)(source, options, definition.name.value)
       )
     )
   }
 
-  const _mutate = _executor(execute)
+  const _query = _execute('query')
 
-  const _subscribe = async (source, options, operationName) => {
-    const iterator = await _executor(subscribe)(source, options, operationName)
+  const _mutate = _execute('mutation')
 
+  // const _mutate = _executor(graphql)
+
+  const _subscribe = async (source, options) => {
+    const document = getDocument(source)
+    const operations = document.definitions.filter(
+      definition => definition.operation === 'subscription'
+    )
+
+    invariant(
+      operations.length === 1,
+      `Only one subscription operation is allowed per query`
+    )
+
+    const iterator = await _executor(subscribe, true)(document, options)
     iterator.toObservable = () => toObservable(iterator)
     return iterator
   }
