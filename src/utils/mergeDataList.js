@@ -1,9 +1,13 @@
+import { isEmpty, } from './isEmpty'
+import { when, } from './when'
+
 export function mergeDataList (list) {
-  return list.reduce((acc, curr) => {
+  const merged = list.reduce((obj, data) => {
     return {
-      ...acc,
-      data: { ...(acc['data'] || {}), ...(curr['data'] || {}), },
-      errors: [ ...(acc['errors'] || []), ...(curr['errors'] || []), ],
+      ...obj,
+      ...data,
     }
   }, {})
+
+  return when(isEmpty, () => {})(merged)
 }
