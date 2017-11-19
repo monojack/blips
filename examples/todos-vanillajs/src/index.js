@@ -48,8 +48,8 @@ const init = async () => {
   render(todos)
 
   // subscribe to allTodos
-  const todosObservable = await store.subscribe(allTodosSubscription)
-  todosObservable.subscribe(({ data: { allTodos, }, }) => {
+  const asyncIterable = await store.subscribe(allTodosSubscription)
+  asyncIterable.toObservable().subscribe(({ data: { allTodos, }, }) => {
     render(allTodos)
   })
 }
@@ -78,7 +78,8 @@ const handleToggle = async e => {
 
   // use store.mutate with `updateTodoMutation` to update the completion state of the todo.
   // `updateTodoMutation` should patch the todo, so we don't need to send the entire payload
-  id && store.mutate(updateTodoMutation, { variables: { id, completed: checked, }, })
+  id &&
+    store.mutate(updateTodoMutation, { variables: { id, completed: checked, }, })
 }
 
 // remove handler
