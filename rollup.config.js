@@ -4,6 +4,7 @@ import babel from 'rollup-plugin-babel'
 import replace from 'rollup-plugin-replace'
 import uglify from 'rollup-plugin-uglify'
 import analyze from 'rollup-analyzer-plugin'
+import builtins from 'rollup-plugin-node-builtins'
 
 const opts = { limit: 5, filter: [], root: __dirname, }
 
@@ -22,6 +23,7 @@ const config = {
   sourcemap: true,
   plugins: [
     resolve(),
+    builtins(),
     babel({
       exclude: '**/node_modules/**',
     }),
