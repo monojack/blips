@@ -60,7 +60,11 @@ export function createStore (schemaDefs = {}, initialState, options = {}) {
       operationName
     )
 
-  const _execute = operation => (source, options) => {
+  const _execute = operation => (source, options, operationName) => {
+    if (operationName) {
+      return _executor(graphql)(source, options, operationName)
+    }
+
     const operations = getDocument(source).definitions.filter(
       definition => definition.operation === operation
     )
@@ -84,10 +88,11 @@ export function createStore (schemaDefs = {}, initialState, options = {}) {
       definition => definition.operation === 'subscription'
     )
 
-    invariant(
-      operations.length === 1,
-      `Only one subscription operation is allowed per query`
-    )
+    if (operations.length < 1) {
+      invariant(false, `No subscription operation defined in query`)
+    } else if (operations.length > 1) {
+      invariant(false, `Only one subscription operation is allowed per query`)
+    }
 
     const iterator = await _executor(subscribe, true)(document, options)
     iterator.toObservable = () => toObservable(iterator)
