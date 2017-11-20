@@ -8,7 +8,7 @@ export default `
   }
 
   type Query {
-    allTodos: [Todo]!
+    allTodos: [Todo!]!
   }
 
   type Mutation {
@@ -18,6 +18,6 @@ export default `
   }
 
   type Subscription {
-    allTodos: [Todo]!
+    allTodos: [Todo!]!
   }
 `

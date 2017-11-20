@@ -23,7 +23,9 @@ class App extends Component {
 
   createTodo = async e => {
     const { mutations: { createTodoMutation } } = this.props
-    await createTodoMutation({ variables: { label: e.target.value } })
+    await createTodoMutation({
+      variables: { label: e.target.value },
+    })
 
     this.setState({
       value: '',
@@ -41,7 +43,9 @@ class App extends Component {
   }
 
   render() {
-    const { data: { loading, error, allTodos = [] } } = this.props
+    const { data: { loading, errors, allTodos = [] } } = this.props
+    if (errors) console.log(errors)
+
     const todosRemaining = allTodos.filter(todo => !todo.completed)
     return (
       <section className="todoapp">
@@ -57,14 +61,13 @@ class App extends Component {
           />
         </header>
         <main className="main">
-          {!loading &&
-            !error && (
-              <TodoList
-                {...{ todos: allTodos }}
-                onToggle={this.onTodoToggle}
-                onRemove={this.onTodoRemove}
-              />
-            )}
+          {!loading && (
+            <TodoList
+              {...{ todos: allTodos }}
+              onToggle={this.onTodoToggle}
+              onRemove={this.onTodoRemove}
+            />
+          )}
         </main>
         <footer className="footer">
           <span className="todo-count">
@@ -81,6 +84,5 @@ export default graphql(
   allTodosSubscription,
   createTodoMutation,
   updateTodoMutation,
-  deleteTodoMutation,
-  { options: { variables: { id: 'asdfbh9f-werg34' } } }
+  deleteTodoMutation
 )(App)

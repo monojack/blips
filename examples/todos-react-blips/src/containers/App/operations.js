@@ -47,3 +47,34 @@ export const deleteTodoMutation = `
     }
   }
 `
+export const todosMutations =
+  createTodoMutation + updateTodoMutation + deleteTodoMutation
+
+export const mergedOperationsWithFragment = `
+  fragment TodoFields on Todo {
+    id
+    label
+    completed
+  }
+
+  subscription allTodosSubscription {
+    allTodos {
+      ...TodoFields
+    }
+  }
+  mutation createTodoMutation($label: String!, $completed: Boolean) {
+    createTodo(label: $label, completed: $completed) {
+      ...TodoFields
+    }
+  }
+  mutation updateTodoMutation($id: String!, $label: String, $completed: Boolean) {
+    updateTodo(id: $id, label: $label, completed: $completed) {
+      ...TodoFields
+    }
+  }
+  mutation deleteTodoMutation($id: String!) {
+    deleteTodo(id: $id) {
+      ...TodoFields
+    }
+  }
+`

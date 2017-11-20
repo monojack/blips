@@ -54,7 +54,8 @@ export default ({ pubsub, withFilter }) => ({
   Subscription: {
     allTodos: {
       resolve: (_, args, { store }) => Object.values(store.get('todos')),
-      subscribe: () => pubsub.asyncIterator(['TODO_UPDATED', 'TODO_CREATED', 'TODO_DELETED']),
+      subscribe: () =>
+        pubsub.asyncIterator(['TODO_UPDATED', 'TODO_CREATED', 'TODO_DELETED']),
     },
   },
 })
