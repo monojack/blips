@@ -1,3 +1,4 @@
+export { mergeHeaders, } from './mergeHeaders'
 export { toObservable, } from './toObservable'
 export { extendContext, } from './extendContext'
 export { getDocument, } from './getDocument'

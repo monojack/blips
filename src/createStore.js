@@ -5,6 +5,7 @@ import { PubSub, withFilter, } from 'graphql-subscriptions'
 import Clerk from 'state-clerk'
 
 import {
+  mergeHeaders,
   toObservable,
   extendContext,
   getDocument,
@@ -12,7 +13,11 @@ import {
   when,
 } from './utils'
 
-export function createStore (schemaDefs = {}, initialState, options = {}) {
+export function createStore (
+  schemaDefs = {},
+  initialState,
+  { context = {}, networkInterface = {}, } = {}
+) {
   let _state = initialState
 
   const _clerk = new Clerk(_state)
@@ -43,7 +48,7 @@ export function createStore (schemaDefs = {}, initialState, options = {}) {
         ..._clerk,
       },
     },
-    options.context
+    context
   )
 
   const _executor = (fn, isSubscription = false) => (
@@ -99,6 +104,41 @@ export function createStore (schemaDefs = {}, initialState, options = {}) {
     return iterator
   }
 
+  const _graphql = (
+    source,
+    { variables, } = {},
+    {
+      endpoint = networkInterface.endpoint,
+      method = 'POST',
+      headers = {},
+      ...config
+    } = networkInterface,
+    operationName
+  ) => {
+    const _method = method === 'GET' ? 'GET' : 'POST'
+
+    const payload = {
+      method: _method,
+      headers: mergeHeaders(
+        {
+          'content-type': 'application/json',
+        },
+        headers
+      ),
+      ...(_method === 'POST' && {
+        body: JSON.stringify({
+          query: source,
+          variables,
+          operationName,
+        }),
+      }),
+      ...config,
+    }
+
+    const request = new window.Request(endpoint, payload)
+    return window.fetch(request)
+  }
+
   return {
     get state () {
       return _state
@@ -109,5 +149,6 @@ export function createStore (schemaDefs = {}, initialState, options = {}) {
     mutate: _mutate,
     query: _query,
     subscribe: _subscribe,
+    graphql: _graphql,
   }
 }

@@ -170,7 +170,7 @@ The returned store instance has the following API:
 * `query`: method for executing queries.
 * `mutate`: method for executing mutations.
 * `subscribe`: method for registering subscriptions.
-* `fetch`: method for sending queries to an actual GraphQL API. _*coming soon*_
+* `graphql`: method for sending queries to a real GraphQL API.
 
 ### Operations and Execution
 
@@ -451,7 +451,7 @@ const createTodoMutation = `
 const newTodo = await store.mutate(createTodoMutation, { variables: { label: 'Buy milk' } })
 ```
 
-#### GraphQL API _*coming soon*_
+#### GraphQL API
 
 ```js
 import { createStore } from 'blips'
@@ -460,7 +460,7 @@ import typeDefs from './types'
 
 const initialState = {}
 
-const store = createStore({ typeDefs, resolvers }, initialState, { endpoint: 'http://localhost:3000/graphql' })
+const store = createStore({ typeDefs, resolvers }, initialState, { networkInterface: { endpoint: 'http://localhost:3000/graphql' } })
 
 const allTodosQuery = `
   query allTodosQuery($first: Int) {
@@ -471,8 +471,8 @@ const allTodosQuery = `
     }
   }
 `
-
-const todos = await store.fetch(allTodosQuery, { first: 10 })
+// store.graphql(source [, variables] [, requestObject] [, operationName] )
+const todos = await store.graphql(allTodosQuery, { variables: { first: 10 } })
 ```
 
 ### Extending the context
