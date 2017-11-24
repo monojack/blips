@@ -18,7 +18,9 @@ export const renderTodoCount = (todos, container) => {
   const remainingTodosCount = remainingTodos.length
   const isSingular = remainingTodosCount === 1
 
-  container.innerHTML = `<strong>${remainingTodosCount}</strong> ${isSingular ? 'item' : 'items'} left`
+  container.innerHTML = `<strong>${remainingTodosCount}</strong> ${
+    isSingular ? 'item' : 'items'
+  } left`
 }
 
 const createLi = todo => {

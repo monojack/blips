@@ -1,7 +1,5 @@
 import { createStore, } from 'blips'
 
-import './index.css'
-
 import typeDefs from './schema/types'
 import resolvers from './schema/resolvers'
 import {
@@ -31,13 +29,23 @@ const initialState = {
 
 // create the store
 const store = createStore({ typeDefs, resolvers, }, initialState, {
-  context: { user: { firstName: 'Anouk', }, },
+  networkInterface: {
+    endpoint: 'http://159.203.96.223/graphql',
+    headers: new window.Headers({ 'content-type': 'application/json', }),
+  },
 })
 
 // renders the list of todos and the todo count
 const render = todos => {
   renderTodos(todos, document.querySelector('.main'))
   renderTodoCount(todos, document.querySelector('.todo-count'))
+}
+
+const addFakeTodoFromList = async list => {
+  if (list.length) {
+    await store.mutate(createTodoMutation, { variables: { ...list.shift(), }, })
+    addFakeTodoFromList(list)
+  }
 }
 
 // init function:
@@ -63,7 +71,6 @@ document.querySelector('.new-todo').addEventListener('keyup', async e => {
   // reset the input value after the mutation
   await store.mutate(createTodoMutation, {
     variables: { label: e.target.value, },
-    context: { foo: 'meeeeeeeeh', },
   })
   e.target.value = ''
 })
@@ -108,6 +115,29 @@ const handleListClick = e => {
 
 // set click event listener on the list-wrapper
 document.querySelector('.main').addEventListener('click', handleListClick)
+
+// make API call to a graphql-server
+const query = `
+  query fakeListQuery($count: Int!) {
+    FakeList(length: $count) {
+      label: sentence
+      completed: boolean
+      id
+    }
+  }
+`
+
+const variables = {
+  count: 3,
+}
+
+const addFakeTodos = async () => {
+  const response = await store.graphql(query, { variables, })
+  const { data: { FakeList: list, }, } = await response.json()
+  addFakeTodoFromList(list)
+}
+
+document.querySelector('button').addEventListener('click', addFakeTodos)
 
 // init!
 init()

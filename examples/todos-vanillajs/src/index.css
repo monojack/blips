@@ -1,151 +1,3 @@
-hr {
-  margin: 20px 0;
-  border: 0;
-  border-top: 1px dashed #c5c5c5;
-  border-bottom: 1px dashed #f7f7f7;
-}
-
-.learn a {
-  font-weight: normal;
-  text-decoration: none;
-  color: #b83f45;
-}
-
-.learn a:hover {
-  text-decoration: underline;
-  color: #787e7e;
-}
-
-.learn h3,
-.learn h4,
-.learn h5 {
-  margin: 10px 0;
-  font-weight: 500;
-  line-height: 1.2;
-  color: #000;
-}
-
-.learn h3 {
-  font-size: 24px;
-}
-
-.learn h4 {
-  font-size: 18px;
-}
-
-.learn h5 {
-  margin-bottom: 0;
-  font-size: 14px;
-}
-
-.learn ul {
-  padding: 0;
-  margin: 0 0 30px 25px;
-}
-
-.learn li {
-  line-height: 20px;
-}
-
-.learn p {
-  font-size: 15px;
-  font-weight: 300;
-  line-height: 1.3;
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-#issue-count {
-  display: none;
-}
-
-.quote {
-  border: none;
-  margin: 20px 0 60px 0;
-}
-
-.quote p {
-  font-style: italic;
-}
-
-.quote p:before {
-  content: '“';
-  font-size: 50px;
-  opacity: 0.15;
-  position: absolute;
-  top: -20px;
-  left: 3px;
-}
-
-.quote p:after {
-  content: '”';
-  font-size: 50px;
-  opacity: 0.15;
-  position: absolute;
-  bottom: -42px;
-  right: 3px;
-}
-
-.quote footer {
-  position: absolute;
-  bottom: -40px;
-  right: 0;
-}
-
-.quote footer img {
-  border-radius: 3px;
-}
-
-.quote footer a {
-  margin-left: 5px;
-  vertical-align: middle;
-}
-
-.speech-bubble {
-  position: relative;
-  padding: 10px;
-  background: rgba(0, 0, 0, 0.04);
-  border-radius: 5px;
-}
-
-.speech-bubble:after {
-  content: '';
-  position: absolute;
-  top: 100%;
-  right: 30px;
-  border: 13px solid transparent;
-  border-top-color: rgba(0, 0, 0, 0.04);
-}
-
-.learn-bar > .learn {
-  position: absolute;
-  width: 272px;
-  top: 8px;
-  left: -300px;
-  padding: 10px;
-  border-radius: 5px;
-  background-color: rgba(255, 255, 255, 0.6);
-  transition-property: left;
-  transition-duration: 500ms;
-}
-
-@media (min-width: 899px) {
-  .learn-bar {
-    width: auto;
-    padding-left: 300px;
-  }
-
-  .learn-bar > .learn {
-    left: 8px;
-  }
-}
-
-html,
-body {
-  margin: 0;
-  padding: 0;
-}
-
 button {
   margin: 0;
   padding: 0;
@@ -170,6 +22,7 @@ body {
   min-width: 230px;
   max-width: 550px;
   margin: 0 auto;
+  padding: 0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-weight: 300;
@@ -251,31 +104,6 @@ body {
   position: relative;
   z-index: 2;
   border-top: 1px solid #e6e6e6;
-}
-
-label[for='toggle-all'] {
-  display: none;
-}
-
-.toggle-all {
-  position: absolute;
-  top: -55px;
-  left: -12px;
-  width: 60px;
-  height: 34px;
-  text-align: center;
-  border: none; /* Mobile Safari */
-}
-
-.toggle-all:before {
-  content: '❯';
-  font-size: 22px;
-  color: #e6e6e6;
-  padding: 10px 27px 10px 27px;
-}
-
-.toggle-all:checked:before {
-  color: #737373;
 }
 
 .todo-list {
@@ -397,8 +225,9 @@ label[for='toggle-all'] {
   left: 0;
   height: 50px;
   overflow: hidden;
-  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2), 0 8px 0 -3px #f6f6f6, 0 9px 1px -3px rgba(0, 0, 0, 0.2),
-    0 16px 0 -6px #f6f6f6, 0 17px 2px -6px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2), 0 8px 0 -3px #f6f6f6,
+    0 9px 1px -3px rgba(0, 0, 0, 0.2), 0 16px 0 -6px #f6f6f6,
+    0 17px 2px -6px rgba(0, 0, 0, 0.2);
 }
 
 .todo-count {
@@ -410,69 +239,30 @@ label[for='toggle-all'] {
   font-weight: 300;
 }
 
-.filters {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  position: absolute;
-  right: 0;
-  left: 0;
+.animate {
+  transition: all 0.1s;
+  -webkit-transition: all 0.1s;
 }
 
-.filters li {
-  display: inline;
-}
-
-.filters li a {
-  color: inherit;
-  margin: 3px;
-  padding: 3px 7px;
-  text-decoration: none;
-  border: 1px solid transparent;
-  border-radius: 3px;
-}
-
-.filters li a:hover {
-  border-color: rgba(175, 47, 47, 0.1);
-}
-
-.filters li a.selected {
-  border-color: rgba(175, 47, 47, 0.2);
-}
-
-.clear-completed,
-html .clear-completed:active {
-  float: right;
+.action-button {
   position: relative;
-  line-height: 20px;
+  width: 100%;
+  padding: 10px 40px;
+  margin: 0px 10px 10px 0px;
+  float: left;
+  border-radius: 10px;
+  font-family: 'Pacifico', cursive;
+  font-size: 25px;
+  background-color: rgba(175, 47, 47, 0.8);
+  border-bottom: 5px solid rgba(175, 47, 47, 1);
+  text-shadow: 0px -2px rgba(175, 47, 47, 1);
   text-decoration: none;
-  cursor: pointer;
+  color: #fff;
 }
-
-.clear-completed:hover {
-  text-decoration: underline;
-}
-
-.info {
-  margin: 65px auto 0;
-  color: #bfbfbf;
-  font-size: 10px;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
-  text-align: center;
-}
-
-.info p {
-  line-height: 1;
-}
-
-.info a {
-  color: inherit;
-  text-decoration: none;
-  font-weight: 400;
-}
-
-.info a:hover {
-  text-decoration: underline;
+.action-button:active {
+  transform: translate(0px, 5px);
+  -webkit-transform: translate(0px, 5px);
+  border-bottom: 1px solid;
 }
 
 /*
@@ -480,7 +270,6 @@ html .clear-completed:active {
 	Can't use it globally since it destroys checkboxes in Firefox
 */
 @media screen and (-webkit-min-device-pixel-ratio: 0) {
-  .toggle-all,
   .todo-list li .toggle {
     background: none;
   }
@@ -488,21 +277,10 @@ html .clear-completed:active {
   .todo-list li .toggle {
     height: 40px;
   }
-
-  .toggle-all {
-    -webkit-transform: rotate(90deg);
-    transform: rotate(90deg);
-    -webkit-appearance: none;
-    appearance: none;
-  }
 }
 
 @media (max-width: 430px) {
   .footer {
     height: 50px;
-  }
-
-  .filters {
-    bottom: 10px;
   }
 }

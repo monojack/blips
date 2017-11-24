@@ -61,7 +61,10 @@ module.exports = {
   plugins: [
     new CleanWebpackPlugin([ 'dist', ]),
     new HtmlWebpackPlugin({ template: './src/index.html', }),
-    new CopyWebpackPlugin([ { from: 'src/favicon.ico', }, ]),
+    new CopyWebpackPlugin([
+      { from: 'src/favicon.ico', },
+      { from: 'src/index.css', },
+    ]),
   ],
   node: {
     dgram: 'empty',
