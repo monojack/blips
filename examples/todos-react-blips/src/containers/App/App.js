@@ -1,14 +1,9 @@
 import React, { Component } from 'react'
-import { graphql } from 'react-blips'
+import { withOperations, graphql, compose } from 'react-blips'
 
-import { TodoList } from '../../components'
+import { TodoList, FakeTodosButton } from '../../components'
 
-import {
-  allTodosSubscription,
-  createTodoMutation,
-  updateTodoMutation,
-  deleteTodoMutation,
-} from './operations'
+import { fakeTodosQuery, mergedOperationsWithFragment } from './operations'
 
 class App extends Component {
   state = {
@@ -42,13 +37,25 @@ class App extends Component {
     deleteTodoMutation({ variables: { id } })
   }
 
+  onButtonClick = async () => {
+    const {
+      queries: { FakeListQuery },
+      mutations: { createTodoMutation },
+    } = this.props
+    const { data: { fakeTodos } } = await FakeListQuery()
+
+    for (const todo of fakeTodos) {
+      createTodoMutation({ variables: todo })
+    }
+  }
+
   render() {
     const { data: { loading, errors, allTodos = [] } } = this.props
     if (errors) console.log(errors)
 
     const todosRemaining = allTodos.filter(todo => !todo.completed)
-    return (
-      <section className="todoapp">
+    return [
+      <section className="todoapp" key={'app-section'}>
         <header className="header">
           <h1>Todos</h1>
           <input
@@ -75,14 +82,17 @@ class App extends Component {
             {todosRemaining.length === 1 ? ' item' : ' items'} left
           </span>
         </footer>
-      </section>
-    )
+      </section>,
+      <FakeTodosButton key={'app-button'} onClick={this.onButtonClick} />,
+    ]
   }
 }
 
-export default graphql(
-  allTodosSubscription,
-  createTodoMutation,
-  updateTodoMutation,
-  deleteTodoMutation
+export default compose(
+  withOperations(fakeTodosQuery, {
+    options: {
+      variables: { length: 3 },
+    },
+  }),
+  graphql(mergedOperationsWithFragment)
 )(App)

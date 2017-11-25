@@ -27,7 +27,12 @@ const initialState = {
 }
 
 // create the store
-const store = createStore({ typeDefs, resolvers }, initialState)
+const store = createStore({ typeDefs, resolvers }, initialState, {
+  networkInterface: {
+    endpoint: 'http://159.203.96.223/graphql',
+    headers: new window.Headers({ 'content-type': 'application/json' }),
+  },
+})
 
 ReactDOM.render(
   <Provider {...{ store }}>

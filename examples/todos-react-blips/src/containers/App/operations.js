@@ -1,3 +1,13 @@
+export const fakeTodosQuery = `
+  query FakeListQuery($length: Int) @api {
+    fakeTodos: FakeList(length: $length) {
+      id
+      label: title
+      completed: boolean
+    }
+  }
+`
+
 export const allTodosQuery = `
   query allTodosQuery {
     allTodos {
