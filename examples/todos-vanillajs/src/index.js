@@ -132,8 +132,7 @@ const variables = {
 }
 
 const addFakeTodos = async () => {
-  const response = await store.graphql(query, { variables, })
-  const { data: { FakeList: list, }, } = await response.json()
+  const { data: { FakeList: list, }, } = await store.graphql(query, { variables, })
   addFakeTodoFromList(list)
 }
 
