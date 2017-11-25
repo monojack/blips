@@ -103,21 +103,22 @@ export function createStore (
     iterator.toObservable = () => toObservable(iterator)
     return iterator
   }
-
   const _graphql = (
     source,
-    { variables, } = {},
     {
-      endpoint = networkInterface.endpoint,
-      method = 'POST',
-      headers = {},
-      ...config
-    } = networkInterface,
+      variables,
+      requestConfig: {
+        endpoint = networkInterface.endpoint,
+        method = 'POST',
+        headers = {},
+        ...requestConfig
+      } = networkInterface,
+    } = {},
     operationName
   ) => {
     const _method = method === 'GET' ? 'GET' : 'POST'
 
-    const payload = {
+    const request = new window.Request(endpoint, {
       method: _method,
       headers: mergeHeaders(
         {
@@ -132,11 +133,15 @@ export function createStore (
           operationName,
         }),
       }),
-      ...config,
-    }
+      ...requestConfig,
+    })
 
-    const request = new window.Request(endpoint, payload)
-    return window.fetch(request)
+    return new Promise((resolve, reject) => {
+      window
+        .fetch(request)
+        .then(response => response.json(), error => reject(error))
+        .then(res => resolve(res), err => reject(err))
+    })
   }
 
   return {
