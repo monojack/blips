@@ -13,6 +13,9 @@ import {
   when,
 } from './utils'
 
+export const NO_SUBSCRIPTION_ERROR = `No subscription operation defined in query`
+export const MAX_SUBSCRIPTION_OPERATIONS_ALLOWED_ERROR = `Only one subscription operation is allowed per query`
+
 export function createStore (
   schemaDefs = {},
   initialState,
@@ -31,7 +34,9 @@ export function createStore (
   })
 
   const _schema = makeExecutableSchema(
-    when(typeof schemaDefs.resolvers === 'function', _computeSchemaDefs)(
+    when(
+      typeof schemaDefs.resolvers === 'function',
+      _computeSchemaDefs,
       schemaDefs
     )
   )
@@ -58,7 +63,7 @@ export function createStore (
   ) =>
     fn(
       _schema,
-      when(isSubscription, getDocument)(sourceOrDocument),
+      when(isSubscription, getDocument, sourceOrDocument),
       {},
       extendContext(_context, context),
       variables,
@@ -76,7 +81,11 @@ export function createStore (
 
     return promiseBatch(
       operations.map(definition =>
-        _executor(graphql)(source, options, definition.name.value)
+        _executor(graphql)(
+          source,
+          options,
+          definition.name && definition.name.value
+        )
       )
     )
   }
@@ -94,9 +103,9 @@ export function createStore (
     )
 
     if (operations.length < 1) {
-      invariant(false, `No subscription operation defined in query`)
+      invariant(false, NO_SUBSCRIPTION_ERROR)
     } else if (operations.length > 1) {
-      invariant(false, `Only one subscription operation is allowed per query`)
+      invariant(false, MAX_SUBSCRIPTION_OPERATIONS_ALLOWED_ERROR)
     }
 
     const iterator = await _executor(subscribe, true)(document, options)
@@ -139,8 +148,9 @@ export function createStore (
     return new Promise((resolve, reject) => {
       window
         .fetch(request)
-        .then(response => response.json(), error => reject(error))
-        .then(res => resolve(res), err => reject(err))
+        .then(response => response.json())
+        .then(data => resolve(data))
+        .catch(error => reject(error))
     })
   }
 

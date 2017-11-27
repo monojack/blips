@@ -5,7 +5,8 @@ export function mergeResponseList (list) {
   let errorList = []
   let dataList = []
 
-  for (const { data, errors, } of list) {
+  for (const item of list) {
+    const { data, errors, } = item || {}
     errors && (errorList = [ ...errorList, ...errors, ])
     data && (dataList = [ ...dataList, data, ])
   }

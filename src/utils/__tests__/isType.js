@@ -1,0 +1,42 @@
+import { isType, } from '../isType'
+
+describe('isType', () => {
+  test('performs correctly :)', () => {
+    expect(isType('number', 1)).toBeTruthy()
+    expect(isType('string', 'foo')).toBeTruthy()
+    expect(isType('object', {})).toBeTruthy()
+    expect(isType('array', [])).toBeTruthy()
+    expect(isType('function', () => {})).toBeTruthy()
+    expect(isType('error', new Error())).toBeTruthy()
+    expect(isType('set', new Set())).toBeTruthy()
+    expect(isType('map', new Map())).toBeTruthy()
+    expect(isType('symbol', Symbol('foo'))).toBeTruthy()
+    expect(isType('undefined')).toBeTruthy()
+    expect(isType('null', null)).toBeTruthy()
+    expect(isType('boolean', false)).toBeTruthy()
+    expect(isType('promise', Promise.resolve('foo'))).toBeTruthy()
+
+    expect(isType('number', '1')).toBeFalsy()
+    expect(isType('object', [])).toBeFalsy()
+    expect(isType('object', new Error())).toBeFalsy()
+    expect(isType('object', new Set())).toBeFalsy()
+    expect(isType('object', new Map())).toBeFalsy()
+    expect(isType('string', false)).toBeFalsy()
+  })
+
+  test('It ignores case', () => {
+    expect(isType('Number', 1)).toBeTruthy()
+    expect(isType('StRiNg', 'foo')).toBeTruthy()
+    expect(isType('OBJECT', {})).toBeTruthy()
+    expect(isType('Array', [])).toBeTruthy()
+    expect(isType('Function', () => {})).toBeTruthy()
+    expect(isType('Error', new Error())).toBeTruthy()
+    expect(isType('Set', new Set())).toBeTruthy()
+    expect(isType('Map', new Map())).toBeTruthy()
+    expect(isType('Symbol', Symbol('foo'))).toBeTruthy()
+    expect(isType('Undefined')).toBeTruthy()
+    expect(isType('Null', null)).toBeTruthy()
+    expect(isType('Boolean', false)).toBeTruthy()
+    expect(isType('Promise', Promise.resolve('foo'))).toBeTruthy()
+  })
+})

@@ -17,4 +17,7 @@
       "experimentalObjectRestSpread": true
     },
   },
+  "env": {
+    "jest": true
+  }
 }
