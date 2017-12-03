@@ -117,12 +117,7 @@ export function BlipsClient (
 
       return promiseBatch(
         executableOperations.map(operation =>
-          _executor(operationType)(
-            operation,
-            options,
-            operation.name.value,
-            resolveFn
-          )
+          _executor(operation, options, operation.name.value, resolveFn)
         )
       )
     }
