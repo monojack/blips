@@ -1,6 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import { createStore } from 'blips'
+import { BlipsClient } from 'blips'
 import { Provider } from 'react-blips'
 
 import './index.css'
@@ -26,16 +26,15 @@ const initialState = {
   },
 }
 
-// create the store
-const store = createStore({ typeDefs, resolvers }, initialState, {
-  networkInterface: {
-    endpoint: 'http://159.203.96.223/graphql',
-    headers: new window.Headers({ 'content-type': 'application/json' }),
+// create the client instance
+const client = new BlipsClient({ typeDefs, resolvers }, initialState, {
+  fetch: {
+    uri: 'http://159.203.96.223/graphql',
   },
 })
 
 ReactDOM.render(
-  <Provider {...{ store }}>
+  <Provider {...{ client }}>
     <App />
   </Provider>,
   document.getElementById('root')

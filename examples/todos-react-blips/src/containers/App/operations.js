@@ -1,5 +1,5 @@
 export const fakeTodosQuery = `
-  query FakeListQuery($length: Int) @api {
+  query FakeListQuery($length: Int) @fetch {
     fakeTodos: FakeList(length: $length) {
       id
       label: title

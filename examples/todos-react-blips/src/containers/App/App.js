@@ -42,7 +42,7 @@ class App extends Component {
       queries: { FakeListQuery },
       mutations: { createTodoMutation },
     } = this.props
-    const { data: { fakeTodos } } = await FakeListQuery()
+    const { data: { fakeTodos = [] } = {} } = await FakeListQuery()
 
     for (const todo of fakeTodos) {
       createTodoMutation({ variables: todo })
