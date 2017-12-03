@@ -50,8 +50,9 @@
     "webpack-merge": "^4.1.1"
   },
   "dependencies": {
+    "apollo-fetch": "0.6.0",
     "babel-polyfill": "^6.26.0",
-    "blips": "^0.11.0",
+    "blips": "1.0.0-rc.1",
     "graphql": "^0.11.7",
     "object-assign": "^4.1.1",
     "promise": "^8.0.1",

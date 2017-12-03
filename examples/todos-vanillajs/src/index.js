@@ -1,4 +1,4 @@
-import { createStore, } from 'blips'
+import { BlipsClient, } from 'blips'
 
 import typeDefs from './schema/types'
 import resolvers from './schema/resolvers'
@@ -27,11 +27,10 @@ const initialState = {
   },
 }
 
-// create the store
-const store = createStore({ typeDefs, resolvers, }, initialState, {
-  networkInterface: {
-    endpoint: 'http://159.203.96.223/graphql',
-    headers: new window.Headers({ 'content-type': 'application/json', }),
+// create the client
+const client = new BlipsClient({ typeDefs, resolvers, }, initialState, {
+  fetch: {
+    uri: 'http://159.203.96.223/graphql',
   },
 })
 
@@ -43,7 +42,7 @@ const render = todos => {
 
 const addFakeTodoFromList = async list => {
   if (list.length) {
-    await store.mutate(createTodoMutation, { variables: { ...list.shift(), }, })
+    await client.mutate(createTodoMutation, { variables: { ...list.shift(), }, })
     addFakeTodoFromList(list)
   }
 }
@@ -52,24 +51,24 @@ const addFakeTodoFromList = async list => {
 // gets the initial list of todos to render and then it subscribes to all todos
 const init = async () => {
   // get initial allTodos
-  const { data: { allTodos: todos, }, } = await store.query(allTodosQuery)
+  const { data: { allTodos: todos, }, } = await client.query(allTodosQuery)
   render(todos)
 
   // subscribe to allTodos
-  const asyncIterable = await store.subscribe(allTodosSubscription)
+  const asyncIterable = await client.subscribe(allTodosSubscription)
   asyncIterable.toObservable().subscribe(({ data: { allTodos, }, }) => {
     render(allTodos)
   })
 }
 
 // creating new todos:
-// use store.mutate with the `createTodoMutation` to add a new todo
+// use client.mutate with the `createTodoMutation` to add a new todo
 document.querySelector('.new-todo').addEventListener('keyup', async e => {
   // if key !== Enter
   if (e.keyCode !== 13) return
 
   // reset the input value after the mutation
-  await store.mutate(createTodoMutation, {
+  await client.mutate(createTodoMutation, {
     variables: { label: e.target.value, },
   })
   e.target.value = ''
@@ -83,18 +82,18 @@ const handleToggle = async e => {
   e.preventDefault()
   const { target: { dataset: { id, }, checked, }, } = e
 
-  // use store.mutate with `updateTodoMutation` to update the completion state of the todo.
+  // use client.mutate with `updateTodoMutation` to update the completion state of the todo.
   // `updateTodoMutation` should patch the todo, so we don't need to send the entire payload
   id &&
-    store.mutate(updateTodoMutation, { variables: { id, completed: checked, }, })
+    client.mutate(updateTodoMutation, { variables: { id, completed: checked, }, })
 }
 
 // remove handler
 const handleRemove = e => {
   const { target: { dataset: { id, }, }, } = e
 
-  // use store.mutate with `deleteTodoMutation` to remove a todo
-  id && store.mutate(deleteTodoMutation, { variables: { id, }, })
+  // use client.mutate with `deleteTodoMutation` to remove a todo
+  id && client.mutate(deleteTodoMutation, { variables: { id, }, })
 }
 
 // use this to trigger different handlers based on the target element tagName:
@@ -132,7 +131,9 @@ const variables = {
 }
 
 const addFakeTodos = async () => {
-  const { data: { FakeList: list, }, } = await store.graphql(query, { variables, })
+  const { data: { FakeList: list, }, } = await client.fetch(query, {
+    variables,
+  })
   addFakeTodoFromList(list)
 }
 
