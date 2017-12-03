@@ -12,7 +12,6 @@ import {
   extendContext,
   getDocument,
   promiseBatch,
-  getOperationType,
   validateWithoutSchema,
 } from './utils'
 
@@ -102,23 +101,20 @@ export function BlipsClient (
         return _executor(document, options, operationName, resolveFn)
       }
 
-      // If there's just one operation definition of the correct type execute it
-      if (
-        document.definitions.length === 1 &&
-        getOperationType(document.definitions[0]) === operationType
-      ) {
-        return _executor(document, options, operationName, resolveFn)
-      }
-
-      // otherwise:
       const executableOperations = document.definitions.filter(
         definition => definition.operation === operationType
       )
 
+      // If there's just one operation definition of the correct type execute it
+      if (executableOperations.length === 1) {
+        return _executor(document, options, operationName, resolveFn)
+      }
+
+      // otherwise:
       return promiseBatch(
-        executableOperations.map(operation =>
-          _executor(operation, options, operation.name.value, resolveFn)
-        )
+        executableOperations.map(operation => {
+          return _executor(document, options, operation.name.value, resolveFn)
+        })
       )
     }
   }
