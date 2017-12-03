@@ -16,14 +16,14 @@ import * as operations from '../__mocks__/operations'
 function fetchNotConfiguredFn (client) {
   return () => {
     return client.fetch(`
-    query fakeListQuery {
-      FakeList(length: 3) {
-        label: sentence
-        completed: boolean
-        id
+      query fakeListQuery {
+        FakeList(length: 3) {
+          label: sentence
+          completed: boolean
+          id
+        }
       }
-    }
-  `)
+    `)
   }
 }
 
@@ -37,6 +37,7 @@ describe('BlipsClient and createBlipsClient', () => {
     schema: expect.any(GraphQLSchema),
   })
   let client
+  const warnMock = jest.fn()
 
   beforeEach(() => {
     client = new BlipsClient({ typeDefs, resolvers, }, initialState, {
@@ -52,7 +53,7 @@ describe('BlipsClient and createBlipsClient', () => {
 
   test('"BlipsClient" and "createStore" return client objects', () => {
     // eslint-disable-next-line
-    console && (console.warn = () => {})
+    console && (console.warn = warnMock)
 
     const store = createStore({ typeDefs, resolvers, }, initialState, {
       fetch: {
@@ -61,9 +62,10 @@ describe('BlipsClient and createBlipsClient', () => {
     })
     expect(store).toEqual(storeObject)
     expect(client).toEqual(storeObject)
-    expect(Object.keys(client)).toHaveLength(6)
+    expect(Object.keys(client)).toHaveLength(7)
     expect(Object.keys(client).sort()).toMatchObject([
       'fetch',
+      'graphql',
       'mutate',
       'query',
       'schema',
@@ -72,17 +74,7 @@ describe('BlipsClient and createBlipsClient', () => {
     ])
   })
 
-  test('The "creteStore" methds logs a deprecation warning', () => {
-    const warnMock = jest.fn()
-    // eslint-disable-next-line
-    console && (console.warn = warnMock)
-
-    createStore({ typeDefs, resolvers, }, initialState, {
-      fetch: {
-        uri: 'http://159.203.96.223/graphql',
-      },
-    })
-
+  test('The "createStore" methds logs a deprecation warning', () => {
     expect(warnMock).toHaveBeenCalledTimes(1)
     expect(warnMock).toHaveBeenCalledWith(CREATESTORE_DEPRECATION_WARNING)
   })
