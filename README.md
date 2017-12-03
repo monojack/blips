@@ -4,7 +4,7 @@
 
 </a>
 
-State container for JavaScript applications
+Client for managing application state with GraphQL operations.
 
 [![Build Status](https://travis-ci.org/monojack/blips.svg?branch=master)](https://travis-ci.org/monojack/blips)
 [![npm version](https://img.shields.io/npm/v/blips.svg)](https://www.npmjs.com/package/blips)
@@ -16,7 +16,7 @@ State container for JavaScript applications
 * [The why?](#the-why)
 * [The basics](#the-basics)
   * [installation](#installation)
-  * [creating the store](#creating-the-store)
+  * [the client instance](#the-client-instance)
   * [operations and execution](#operations-and-execution)
   * [subscriptions](#subscriptions)
   * [fetching data](#fetching-data)
@@ -27,11 +27,12 @@ State container for JavaScript applications
 
 ## The concept
 
-**Blips** exposes a simple, GraphQL-like API for managing your application
-state, which is contained inside a single _store_.
+**Blips** exposes a simple interface for managing your application state with
+GraphQL.
 
-The store can only be changed through **_mutations_**, you can read from it
-through **_queries_** and can also listen for changes with **_subscriptions_**.
+The state is contained inside a single _store_ object. It can only be changed
+through **_mutations_**, you can read from it through **_queries_** and can also
+listen for changes with **_subscriptions_**.
 
 ## The why?
 
@@ -50,13 +51,15 @@ and read about GraphQL in detail.
 ### Installation
 
 ```bash
-npm install blips
+npm install blips graphql
 ```
 
-### Creating the store
+### The client instance
 
-Creating a client requires type definitions, resolvers and an optional object
-containing the initial state.
+> new BlipsClient({ typeDefs [, resolvers] } [, initialState] [, config] )
+
+Creating a client requires type definitions, optional resolvers, optional
+initial state and an optional configuration object.
 
 ##### typeDefs
 
@@ -146,7 +149,7 @@ const initialState = {
 }
 const schemaDef = { typeDefs, resolvers }
 
-// new BlipsClient({ typeDefs [, resolvers] } [, initialState] [, options] )
+// new BlipsClient({ typeDefs [, resolvers] } [, initialState] [, config] )
 const client = new BlipsClient(schemaDef, initialState)
 ```
 
@@ -161,8 +164,6 @@ The client object has the following API:
 
 * `state`: getter for your entire state.
 * `schema`: getter for your generated schema.
-* `store`: provides access to the state object and a couple of CRUD methods for
-  managing it, provided through
   [state-clerk](https://github.com/monojack/state-clerk).
 * `query`: method for executing queries.
 * `mutate`: method for executing mutations.
@@ -328,9 +329,9 @@ a specific topic while your subscription resolvers subscribe to one or more
 topics.
 
 In order to use subscriptions with **Blips**, you need to have access to the
-store's `PubSub` instance. We can achieve that by passing a `resolvers` function
-instead of an object when creating the client instance. This function accepts as
-first argument an object containing the `PubSub` instance and the
+client's `PubSub` instance. We can achieve that by passing a `resolvers`
+function instead of an object when creating the client instance. This function
+accepts as first argument an object containing the `PubSub` instance and the
 [`withFilter`](https://github.com/apollographql/graphql-subscriptions#filters)
 method.
 
