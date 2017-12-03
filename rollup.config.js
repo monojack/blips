@@ -12,9 +12,10 @@ const env = process.env.NODE_ENV
 
 const config = {
   input: 'src/index.js',
-  external: [ 'graphql', ],
+  external: [ 'graphql', 'apollo-fetch', ],
   globals: {
-    graphql: 'graphql',
+    graphql: 'GraphQL',
+    'apollo-fetch': 'ApolloFetch',
   },
   output: {
     format: 'umd',

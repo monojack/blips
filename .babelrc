@@ -6,11 +6,16 @@
   ],
   "presets": [["es2015", { "loose": true, "modules": false }], "stage-0"],
   "env": {
+    "es": {
+      "ignore": ["**/__tests__/**", "**/__mocks__/**"]
+    },
     "cjs": {
-      "plugins": [["transform-es2015-modules-commonjs", { "loose": true }]]
+      "plugins": [["transform-es2015-modules-commonjs", { "loose": true }]],
+      "ignore": ["**/__tests__/**", "**/__mocks__/**"]
     },
     "rollup": {
-      "plugins": ["external-helpers"]
+      "plugins": ["external-helpers"],
+      "ignore": ["**/__tests__/**", "**/__mocks__/**"]
     },
     "test": {
       "plugins": [["transform-es2015-modules-commonjs", { "loose": true }]]

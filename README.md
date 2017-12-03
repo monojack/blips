@@ -55,7 +55,7 @@ npm install blips
 
 ### Creating the store
 
-Creating a store requires type definitions, resolvers and an optional object
+Creating a client requires type definitions, resolvers and an optional object
 containing the initial state.
 
 ##### typeDefs
@@ -126,12 +126,12 @@ The `resolvers.js` file provides definitions for `allTodos` query and the
 See [graphql.org](http://graphql.org/learn/execution/#root-fields-resolvers) to
 read more about resolvers.
 
-##### store
+##### client
 
 ```js
 // index.js
 
-import { createStore } from 'blips'
+import { BlipsClient } from 'blips'
 import resolvers from './resolvers'
 import typeDefs from './types'
 
@@ -146,21 +146,18 @@ const initialState = {
 }
 const schemaDef = { typeDefs, resolvers }
 
-// createStore({ typeDefs [, resolvers] } [, initialState] [, options] )
-const store = createStore(schemaDef, initialState)
+// new BlipsClient({ typeDefs [, resolvers] } [, initialState] [, options] )
+const client = new BlipsClient(schemaDef, initialState)
 ```
 
-You create a store by calling the `createStore` function provided by `blips` and
-passing it your schema definitions (`{ typeDefs, resolvers }`) and an optional
-initial state. In addition to the `schemaDefs` and `initialState`, the
-`createStore` method also accepts `options` as the last and optional argument.
-`options` is used for tapping into the initial setup.
+You create a new client by providing your schema definitions (`{ typeDefs,
+resolvers }`) and an optional initial state. In addition to the `schemaDefs` and
+`initialState`, you can also privide a `configuration` object as the last and
+optional argument. The `configuration` parameter is used for tapping into the
+initial setup to define default variables or context properties and to configure
+the `fetch` method.
 
-For now, you can use `options` to extend the context provided to resolvers (
-_`const store = createStore(schemaDefs, initialState, { context: { user: {
-...loggedUser } } })`_), but any PR is welcome if you come up with good ideas.
-
-The returned store instance has the following API:
+The client object has the following API:
 
 * `state`: getter for your entire state.
 * `schema`: getter for your generated schema.
@@ -170,12 +167,12 @@ The returned store instance has the following API:
 * `query`: method for executing queries.
 * `mutate`: method for executing mutations.
 * `subscribe`: method for registering subscriptions.
-* `graphql`: method for sending queries to a real GraphQL API.
+* `fetch`: method for sending queries to a real GraphQL API.
 
 ### Operations and Execution
 
 You define operations in the form of GraphQL queries, mutations or subscriptions
-and use their respective store methods for executing them.
+and use the client methods for executing them.
 
 #### operations
 
@@ -207,9 +204,9 @@ Read more about [queries and mutations](http://graphql.org/learn/queries)
 #### execution
 
 ```js
-import { todoQuery, createTodoMutation } from 'blips'
+import { todoQuery, createTodoMutation } from './operations'
 
-store
+client
   .query(todoQuery, {
     variables: { id: '3c4a086e-2151-4b54-acb2-13044ea553c1' },
   })
@@ -225,7 +222,7 @@ store
     // }
   })
 
-store
+client
   .mutate(createTodoMutation, {
     variables: {
       id: '4ecca858-67f8-491e-94cc-48b262061819',
@@ -249,16 +246,17 @@ store
 If you've used Redux before you can think of execution methods as dispatchers.
 All executors may receive three arguments:
 
-* `operation`: can be in the form of documents or documentASTs
-* `variables`: object containing the values for field arguments
-* `context`: object containing any additional data that you might want to pass
-  to the resolvers, like the currently logged in user, tokens etc. (This will
-  extend the default context)
+* `operation`: can be in the form of source or documentAST
+* `options`: object containing:
+  * `variables`: the operation variables
+  * `context`: object containing any additional data that you want to pass to
+    the resolvers, like the currently logged in user, tokens etc. (This will
+    extend the default context)
 
-All executors return promises that eventually resolve/reject with an object
-containing a `data` prop which holds the requested data. If, for some reason,
-the operation was not successful, the `data` prop will hold an `error` object
-instead of the requested field.
+All executors return promises that eventually resolve with an object containing
+a `data` prop which holds the requested data. If, for some reason, the operation
+was not successful, the `data` prop will hold an `error` object instead of the
+requested field.
 
 Managing your state in an asynchronous way might seem scary but unless you're
 actually fetching data from a web service, hitting an API or performing database
@@ -266,7 +264,7 @@ queries, your data will be available with the next tick. This behaviour also
 comes with a few benefits:
 
 * it forces you to introduce checks and error handlers which will eventually
-  result in (I think) better code.
+  result in better code.
 * you can write abstractions or helpers for managing your data and they will
   apply everywhere.
 * it's much easier if you decide to switch from caching some of your state
@@ -296,7 +294,7 @@ const allTodosSubscription = `
   }
 `
 
-const asyncIterator = await store.subscribe(allTodosSubscription)
+const asyncIterator = await client.subscribe(allTodosSubscription)
 
 /* Either use for-await-of */
 try {
@@ -311,10 +309,10 @@ try {
 
 /* or transform the iterator into an observable and subscribe to it */
 const sub = asyncIterator.toObservable().subscribe(
-  res => {
+  next => {
     // { data: { allTodos: [ ... ] } }
   },
-  err => {
+  error => {
     // { data: { error: { ... } } }
   }
 )
@@ -326,13 +324,13 @@ const sub = asyncIterator.toObservable().subscribe(
 **Blips** uses [Apollo's
 graphql-subscriptions](https://github.com/apollographql/graphql-subscriptions)
 **PubSub** implementation, where any query or mutation would `publish` data over
-a specific topic and have your subscription resolvers subscribe to one or more
+a specific topic while your subscription resolvers subscribe to one or more
 topics.
 
 In order to use subscriptions with **Blips**, you need to have access to the
 store's `PubSub` instance. We can achieve that by passing a `resolvers` function
-instead of an object to `createStore`. This function accepts as first argument
-an object containing the `PubSub` instance and the
+instead of an object when creating the client instance. This function accepts as
+first argument an object containing the `PubSub` instance and the
 [`withFilter`](https://github.com/apollographql/graphql-subscriptions#filters)
 method.
 
@@ -448,19 +446,19 @@ const createTodoMutation = `
   }
 `
 
-const newTodo = await store.mutate(createTodoMutation, { variables: { label: 'Buy milk' } })
+const newTodo = await client.mutate(createTodoMutation, { variables: { label: 'Buy milk' } })
 ```
 
 #### GraphQL API
 
 ```js
-import { createStore } from 'blips'
+import { BlipsClient } from 'blips'
 import resolvers from './resolvers'
 import typeDefs from './types'
 
 const initialState = {}
 
-const store = createStore({ typeDefs, resolvers }, initialState, { networkInterface: { endpoint: 'http://localhost:3000/graphql' } })
+const client = new BlipsClient({ typeDefs, resolvers }, initialState, { fetch: { uri: 'http://localhost:3000/graphql' } })
 
 const allTodosQuery = `
   query allTodosQuery($first: Int) {
@@ -471,20 +469,20 @@ const allTodosQuery = `
     }
   }
 `
-// store.graphql(source [, variables] [, requestObject] [, operationName] )
-const todos = await store.graphql(allTodosQuery, { variables: { first: 10 } })
+// client.fetch(query [, options] [, operationName] )
+const todos = await client.fetch(allTodosQuery, { variables: { first: 10 } })
 ```
 
 ### Extending the context
 
 You can extend the context provided to the resolvers in two ways:
 
-**1.** When creating the store, by passing a `context` object through the
-`options` argument. This will extend the default context will be available to
-all your resolvers:
+**1.** When creating the client instance, by passing a `context` object through
+the `options` argument. This will extend the default context will be available
+to all your resolvers:
 
 ```js
-const store = createStore({ typeDefs, resolvers }, initialState, {
+const client = new BlipsClient({ typeDefs, resolvers }, initialState, {
   context: { foo: 'bar' },
 })
 ```
@@ -492,7 +490,7 @@ const store = createStore({ typeDefs, resolvers }, initialState, {
 **2.** Through the `options` argument of every executor, which will make it
 available only for that execution context:
 
-> `store.query(allBookmarksQuery, { context: { user: loggedUser } })`
+> `client.query(allBookmarksQuery, { context: { user: loggedUser } })`
 
 example:
 
@@ -534,7 +532,7 @@ const initialState = {
   ],
 }
 
-const store = createStore({ typeDefs, resolvers }, initialState)
+const client = new BlipsClient({ typeDefs, resolvers }, initialState)
 
 const allBookmarksQuery = `
   query allBookmarksQuery {
@@ -545,7 +543,7 @@ const allBookmarksQuery = `
     }
   }
 `
-const myBookmarks = store.query(allBookmarksQuery, {
+const myBookmarks = client.query(allBookmarksQuery, {
   context: { user: loggedUser },
 })
 ```
@@ -563,8 +561,8 @@ idea of how it works.
 
 ### [dataloader](https://github.com/facebook/dataloader)
 
-Since this is `GraphQL`, some of your operations would result in multiple
-queries for the same resource. Imagine the following scenario:
+Since this is `GraphQL`, some of your operations may result in multiple queries
+for the same resource. Imagine the following scenario:
 
 ```js
 const state = {
@@ -656,7 +654,7 @@ config](https://www.apollographql.com/docs/react/recipes/webpack.html).
 ### mergers
 
 You can further split your queries and/or type definitions in multiple modules
-and use a package that will merge them before `createStore`. See
+and use a package that will merge them before creating the client instance. See
 [merge-graphql-schemas](https://github.com/okgrow/merge-graphql-schemas) or
 [gql-merge](https://www.npmjs.com/package/gql-merge)
 

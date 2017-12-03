@@ -1,1 +1,1 @@
-export { createStore, } from './createStore'
+export { BlipsClient, createStore, } from './BlipsClient'

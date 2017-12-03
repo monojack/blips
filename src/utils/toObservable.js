@@ -1,7 +1,7 @@
-import { Observable, } from 'rxjs/Observable'
+import Observable from 'zen-observable'
 
 export function toObservable (iterator) {
-  return Observable.create(observer => {
+  return new Observable(observer => {
     ;(async () => {
       try {
         for await (const tick of iterator) {
@@ -12,6 +12,9 @@ export function toObservable (iterator) {
         observer.error(e)
       }
     })()
-    return iterator.return
+    return () => {
+      observer.complete()
+      iterator.return()
+    }
   })
 }
