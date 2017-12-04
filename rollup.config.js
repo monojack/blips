@@ -12,10 +12,9 @@ const env = process.env.NODE_ENV
 
 const config = {
   input: 'src/index.js',
-  external: [ 'graphql', 'apollo-fetch', ],
+  external: [ 'graphql', ],
   globals: {
     graphql: 'GraphQL',
-    'apollo-fetch': 'ApolloFetch',
   },
   output: {
     format: 'umd',
@@ -23,7 +22,10 @@ const config = {
   name: 'blips',
   sourcemap: true,
   plugins: [
-    resolve(),
+    resolve({
+      browser: true,
+      jsnext: true,
+    }),
     builtins(),
     babel({
       exclude: '**/node_modules/**',
@@ -34,6 +36,8 @@ const config = {
     commonjs(),
     analyze(opts),
   ],
+  exports: 'named',
+  onwarn,
 }
 
 if (env === 'production') {
@@ -47,6 +51,19 @@ if (env === 'production') {
       },
     })
   )
+}
+
+function onwarn (message) {
+  const suppressed = [
+    'UNRESOLVED_IMPORT',
+    'MISSING_EXPORT',
+    'THIS_IS_UNDEFINED',
+  ]
+
+  if (!suppressed.find(code => message.code === code)) {
+    // eslint-disable-next-line
+    return console.warn(message.message)
+  }
 }
 
 export default config
