@@ -54,11 +54,7 @@ if (env === 'production') {
 }
 
 function onwarn (message) {
-  const suppressed = [
-    'UNRESOLVED_IMPORT',
-    'MISSING_EXPORT',
-    'THIS_IS_UNDEFINED',
-  ]
+  const suppressed = [ 'THIS_IS_UNDEFINED', ]
 
   if (!suppressed.find(code => message.code === code)) {
     // eslint-disable-next-line
