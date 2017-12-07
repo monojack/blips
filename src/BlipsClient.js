@@ -5,8 +5,8 @@ import { createApolloFetch, } from 'apollo-fetch'
 import Clerk from 'state-clerk'
 
 import {
-  isEmpty,
   when,
+  isEmpty,
   isType,
   toObservable,
   extendContext,
@@ -222,6 +222,7 @@ export function BlipsClient (
 
       return _apolloFetch({ query, variables, operationName, })
     },
+
     graphql: (query, { variables = {}, } = {}, operationName) => {
       if (!loggedWarnings[CLIENTGRAPHQL_DEPRECATION_WARNING]) {
         // eslint-disable-next-line
