@@ -15,7 +15,6 @@ import {
   validateWithoutSchema,
 } from './utils'
 
-const loggedWarnings = {}
 export const CLIENTGRAPHQL_DEPRECATION_WARNING = ` The "graphql" method is deprecated and will be removed in the 1.0 release. Use the "fetch" method instead.`
 export const CREATESTORE_DEPRECATION_WARNING = `The "createStore" method is deprecated and will be removed in the 1.0 release. Use "new BlipsClient(...)" instead`
 export const FETCH_NOT_CONFIGURED_ERROR = `You are trying to use "BlipsClient.fetch" without it being configured.`
@@ -24,6 +23,8 @@ export const LONE_SUBSCRIPTION_OPERATION_ERROR = `Only one subscription operatio
 export const incorrectMiddlewareOrAfterwareType = (
   name = 'middleware/afterware'
 ) => `The fetch ${name} must be a function or an array of functions`
+
+const loggedWarnings = {}
 
 export function BlipsClient (
   { typeDefs, resolvers, } = {},
@@ -133,13 +134,10 @@ export function BlipsClient (
       resolvers
     )
 
-    // make and store the executable schema if typeDefs provided
-    if (typeDefs) {
-      _schema = makeExecutableSchema({
-        typeDefs,
-        resolvers: _resolvers,
-      })
-    }
+    _schema = makeExecutableSchema({
+      typeDefs,
+      resolvers: _resolvers,
+    })
 
     // store the default variables
     _variables = variables
