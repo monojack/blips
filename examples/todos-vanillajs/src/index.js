@@ -55,8 +55,8 @@ const init = async () => {
   render(todos)
 
   // subscribe to allTodos
-  const asyncIterable = await client.subscribe(allTodosSubscription)
-  asyncIterable.toObservable().subscribe(({ data: { allTodos, }, }) => {
+  const observable = await client.subscribe(allTodosSubscription)
+  observable.subscribe(({ data: { allTodos, }, }) => {
     render(allTodos)
   })
 }
