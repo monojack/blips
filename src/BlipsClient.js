@@ -209,8 +209,7 @@ export function BlipsClient (
         operationName,
         resolveFn
       )
-      iterator.toObservable = () => toObservable(iterator)
-      return iterator
+      return toObservable(iterator)
     },
 
     fetch: (query, { variables = {}, } = {}, operationName) => {
